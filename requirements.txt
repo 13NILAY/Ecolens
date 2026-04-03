@@ -1,0 +1,11 @@
+pdfplumber
+camelot-py
+pandas
+pypdf
+opencv-python-headless
+
+# Optional ML and semantic normalization dependencies
+transformers
+torch
+datasets
+sentence-transformers
