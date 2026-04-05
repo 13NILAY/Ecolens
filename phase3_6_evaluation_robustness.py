@@ -1,18 +1,19 @@
 """
-PHASES 3-6: EVALUATION, ROBUSTNESS, AND PRODUCTION (UPDATED ARCHITECTURE)
+PHASES 3-6: EVALUATION, ROBUSTNESS, AND PRODUCTION (v3 — Delta Precision Fixes)
 ==========================================================================
 
 Complete evaluation and deployment for all 11 layers:
 
-Layer 4: ESG Candidate Filter evaluation
+Layer 4: ESG Candidate Filter evaluation (v3: tighter gate, 70-85% target)
 Layer 5: NER model evaluation
 Layer 6: Metric Classifier evaluation
 Layer 7-11: Value extraction, validation, end-to-end testing
 
 Plus:
-- Real-world PDF noise simulation
-- Confidence calibration
-- Production deployment guide
+- Real-world PDF noise simulation (bugfix: noise now applied to every sample)
+- Confidence calibration (v3 target: avg 55-75%)
+- v3 guard checks: score metric values, noise integers, proximity filtering
+- Production deployment guide with v3 target metrics
 """
 
 import json
@@ -116,11 +117,27 @@ class SyntheticToRealBridge:
         for sample in data:
             # Original
             augmented_data.append(sample)
-            
+
             # Noisy version
             noisy = sample.copy()
-            noisy['text'] = self.add_pdf_noise(sample['text'], noise_level)
-            noisy['id'] = f"{sample['id']}_noisy"
+
+            # Handle different dataset structures
+            if 'text' in sample:
+                # NER and relation datasets
+                noisy['text'] = self.add_pdf_noise(sample['text'], noise_level)
+
+            elif 'context' in sample:
+                # Classification dataset
+                noisy['context'] = self.add_pdf_noise(sample['context'], noise_level)
+
+                # Optional: also noise metric_text if present
+                if 'metric_text' in sample:
+                    noisy['metric_text'] = self.add_pdf_noise(
+                        sample['metric_text'], noise_level * 0.5
+                    )
+
+            # Add ID safely
+            noisy['id'] = f"{sample['id']}_noisy" if 'id' in sample else "noisy_sample"
             augmented_data.append(noisy)
         
         with open(output_path, 'w') as f:
@@ -476,50 +493,79 @@ class ESGEvaluator:
         predictions: List[Dict]
     ) -> Dict:
         """
-        Evaluate Layer 10: Confidence Scoring
-        
-        Check if confidence scores are well-calibrated
+        Evaluate Layer 10: Confidence Scoring (v3)
+
+        v3 target: avg confidence 55-75% (was ~37% in v2 due to penalty stacking).
+        Also checks score metric suppression and noise-value absence.
         """
         print("\n" + "="*70)
-        print("LAYER 10: CONFIDENCE CALIBRATION")
+        print("LAYER 10: CONFIDENCE CALIBRATION (v3)")
         print("="*70)
-        
+
+        if predictions:
+            all_conf = [p.get('confidence_score', p.get('confidence', 0)) for p in predictions]
+            avg_conf = float(np.mean(all_conf))
+            print(f"\nConfidence Statistics:")
+            print(f"  Average: {avg_conf:.2%}  (v3 target: 55-75%)")
+            print(f"  Min:     {float(np.min(all_conf)):.2%}  (floor: 30%)")
+            print(f"  Max:     {float(np.max(all_conf)):.2%}  (ceiling: 95%)")
+            high_quality = sum(1 for c in all_conf if c > 0.70)
+            print(f"  >70% (high quality): {high_quality}/{len(all_conf)} "
+                  f"({high_quality/len(all_conf):.1%})")
+
+            # v3 check: no *_SCORE metric with value < 20
+            bad_scores = [
+                p for p in predictions
+                if p.get('normalized_metric', '').endswith('_SCORE')
+                and p.get('value', 100) < 20
+            ]
+            print(f"\nv3 Score Guard — *_SCORE values < 20: {len(bad_scores)} "
+                  f"(target: 0)")
+
+            # v3 check: no noise integers in output
+            noise_values = {1, 2, 3, 4, 5, 10}
+            noise_hits = [
+                p for p in predictions
+                if p.get('value') in noise_values and p.get('unit') != '%'
+            ]
+            print(f"v3 Noise Guard — standalone noise integers: {len(noise_hits)} "
+                  f"(target: 0)")
+
         bins = np.linspace(0, 1, 11)
         bin_accuracy = []
         bin_counts = []
-        
+
         for i in range(len(bins) - 1):
             bin_low = bins[i]
             bin_high = bins[i+1]
-            
+
             bin_preds = [
                 p for p in predictions
-                if bin_low <= p.get('confidence_score', 0) < bin_high
+                if bin_low <= p.get('confidence_score', p.get('confidence', 0)) < bin_high
             ]
-            
+
             if not bin_preds:
                 continue
-            
+
             correct = sum(1 for p in bin_preds if p.get('is_correct', False))
             accuracy = correct / len(bin_preds)
-            
+
             bin_accuracy.append(accuracy)
             bin_counts.append(len(bin_preds))
-            
+
             print(f"Confidence {bin_low:.1f}-{bin_high:.1f}: "
                   f"Accuracy={accuracy:.2%} (n={len(bin_preds)})")
-        
-        # Calculate calibration error
+
         calibration_error = 0
-        for i, (acc, count) in enumerate(zip(bin_accuracy, bin_counts)):
-            expected_conf = (bins[i] + bins[i+1]) / 2
-            calibration_error += abs(acc - expected_conf) * count
-        
-        calibration_error /= len(predictions)
-        
+        if bin_accuracy:
+            for i, (acc, count) in enumerate(zip(bin_accuracy, bin_counts)):
+                expected_conf = (bins[i] + bins[i+1]) / 2
+                calibration_error += abs(acc - expected_conf) * count
+            calibration_error /= max(len(predictions), 1)
+
         print(f"\nExpected Calibration Error: {calibration_error:.4f}")
-        print("(Lower is better, <0.05 is well-calibrated)")
-        
+        print("(Lower is better; <0.10 is acceptable, <0.05 is well-calibrated)")
+
         return {
             'bin_accuracy': bin_accuracy,
             'bin_counts': bin_counts,
@@ -535,7 +581,7 @@ def main():
     """Run comprehensive evaluation and robustness testing"""
     
     print("\n" + "="*70)
-    print("ESG EXTRACTION: EVALUATION & ROBUSTNESS (ALL 11 LAYERS)")
+    print("ESG EXTRACTION: EVALUATION & ROBUSTNESS v3 (ALL 11 LAYERS)")
     print("="*70)
     
     # 1. Add PDF noise to datasets
@@ -564,7 +610,7 @@ def main():
     print("="*70)
     
     evaluation_guide = """
-To evaluate the complete 11-layer pipeline:
+To evaluate the complete 11-layer pipeline (v3):
 
 1. PREPARE TEST DATA
    Load: ./processed_data/*_test.json
@@ -572,52 +618,65 @@ To evaluate the complete 11-layer pipeline:
 
 2. RUN INFERENCE
    - Load trained models (ESG filter, NER, Classifier)
-   - Process test samples through complete pipeline
+   - Process test samples through complete pipeline (v3)
    - Save predictions with confidence scores
 
 3. EVALUATE EACH LAYER
    evaluator = ESGEvaluator()
-   
+
    # Layer 4: ESG Filter
    filter_results = evaluator.evaluate_esg_filter(predictions, ground_truth)
-   
+
    # Layer 5: NER
    ner_results = evaluator.evaluate_ner(predictions, ground_truth)
-   
+
    # Layer 6: Classifier
    class_results = evaluator.evaluate_classification(predictions, ground_truth)
-   
+
    # Layer 11: Validation
    val_results = evaluator.evaluate_validation_layer(validation_examples)
-   
-   # Layers 10: Confidence
+
+   # Layer 10: Confidence
    conf_results = evaluator.evaluate_confidence_calibration(predictions)
-   
+
    # End-to-End (All layers)
    e2e_results = evaluator.evaluate_end_to_end(predictions, ground_truth)
-   
+
    # Error Analysis
    errors = evaluator.analyze_errors(predictions, ground_truth)
 
-4. TARGET METRICS
-   Layer 4 (ESG Filter):
-     - Recall: >0.95 (don't miss ESG content)
-     - Precision: >0.90 (avoid processing junk)
-   
+4. TARGET METRICS (7 metrics only)
+   Target: SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION,
+           WATER_USAGE, WASTE_GENERATED, ESG_SCORE
+
+   Layer 4 (ESG Filter) — 2 keywords + conf >= 0.4:
+     - Recall:    >0.90
+     - Precision: >0.92
+     - ESG chunk rate: 70-85%
+
    Layer 5 (NER):
-     - F1 Score: >0.92
-   
-   Layer 6 (Classifier):
-     - Accuracy: >0.95
-   
-   Layers 7-9 (Value Extraction):
-     - Exact match: >0.85
-   
-   Layer 11 (Validation):
-     - Correct flagging: >0.95
-   
+     - F1 Score:  >0.92
+
+   Layer 6 (Classifier — 7 classes):
+     - Accuracy:  >0.95
+
+   Layers 7-9 (Value Extraction) — closest-only + proximity <=100:
+     - Exact match: >0.87
+     - No noise values: integers <5 or {{1,2,3,4,5,10}} must not appear
+
+   Layer 10 (Confidence) — min-penalty strategy:
+     - Avg confidence:    55-75%
+     - High-quality (>70%): majority of valid extractions
+     - Calibration ECE:   <0.10
+
+   Layer 11 (Validation) — score metric guard:
+     - Correct flagging:  >0.95
+     - ESG_SCORE false positives: 0  (values <20 or without score keyword discarded)
+
    End-to-End (All 11 layers):
-     - Full accuracy: >0.80
+     - Full accuracy: >0.82
+     - No ESG_SCORE metrics with value <20 in output
+     - Only 7 target metrics in output — no other metrics
 
 5. ITERATE
    - Identify weakest layer

@@ -35,6 +35,14 @@ import numpy as np
 from pathlib import Path
 
 
+# TARGET METRICS — only these 7 metrics are used
+TARGET_METRICS: Set[str] = {
+    'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
+    'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
+    'ESG_SCORE',
+}
+
+
 @dataclass
 class EntitySpan:
     """Represents a metric entity in text"""
@@ -110,27 +118,13 @@ class ESGDataTransformer:
     def _init_validation_rules(self):
         """Initialize validation rules for Layer 11"""
         self.validation_ranges = {
-            'GHG_SCOPE_1': (0, 100_000_000),
-            'GHG_SCOPE_2': (0, 100_000_000),
-            'GHG_SCOPE_3': (0, 500_000_000),
-            'TOTAL_GHG': (0, 500_000_000),
-            'CARBON_INTENSITY': (0, 10000),
+            'SCOPE_1': (0, 100_000_000),
+            'SCOPE_2': (0, 100_000_000),
+            'SCOPE_3': (0, 500_000_000),
             'ENERGY_CONSUMPTION': (0, 50_000_000),
-            'RENEWABLE_ENERGY_PCT': (0, 100),
             'WATER_USAGE': (0, 100_000_000),
             'WASTE_GENERATED': (0, 10_000_000),
-            'WASTE_RECYCLED_PCT': (0, 100),
-            'EMPLOYEE_COUNT': (1, 10_000_000),
-            'GENDER_DIVERSITY_PCT': (0, 100),
-            'TRAINING_HOURS': (0, 500),
-            'INJURY_RATE': (0, 100),
-            'EMPLOYEE_TURNOVER_PCT': (0, 100),
             'ESG_SCORE': (0, 100),
-            'ENVIRONMENTAL_SCORE': (0, 100),
-            'SOCIAL_SCORE': (0, 100),
-            'GOVERNANCE_SCORE': (0, 100),
-            'BOARD_INDEPENDENCE_PCT': (0, 100),
-            'ETHICS_VIOLATIONS': (0, 1000)
         }
     
     def _log(self, message: str):
@@ -478,9 +472,11 @@ class ESGDataTransformer:
             # Layer 4: Check if ESG candidate
             is_esg = self.is_esg_candidate(text)
             
-            # Find all entity spans
+            # Find all entity spans — only for target metrics
             all_spans = []
             for metric_idx, metric in enumerate(sample['metrics']):
+                if metric['normalized_metric'] not in TARGET_METRICS:
+                    continue
                 spans = self.find_metric_spans(
                     text,
                     metric['metric'],
@@ -551,6 +547,10 @@ class ESGDataTransformer:
                 metric_name = metric['metric']
                 normalized_metric = metric['normalized_metric']
                 
+                # Skip non-target metrics
+                if normalized_metric not in TARGET_METRICS:
+                    continue
+                
                 # Find metric in text
                 spans = self.find_metric_spans(
                     text, metric_name, metric_idx, normalized_metric, section_type
@@ -593,6 +593,10 @@ class ESGDataTransformer:
                 normalized_metric = metric['normalized_metric']
                 value = metric['value']
                 unit = metric.get('unit', '')
+                
+                # Skip non-target metrics
+                if normalized_metric not in TARGET_METRICS:
+                    continue
                 
                 # Layer 11: Validate metric
                 is_valid, issues = self.validate_metric(normalized_metric, value)

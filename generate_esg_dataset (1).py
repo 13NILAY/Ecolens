@@ -1,6 +1,17 @@
 """
-ESG Dataset Generator - Production Grade
-Generates 50,000-60,000 realistic samples for training ML models on ESG metric extraction
+ESG Dataset Generator - Production Grade (v2 — Real-World Training)
+==================================================================
+Generates 55,000 realistic samples for training ML models on ESG metric extraction.
+
+Data distribution:
+  - Clean sentences: 30%
+  - Tables: 25%
+  - Broken text: 20%
+  - Noisy paragraphs: 15%
+  - Multi-value confusion: 10%
+
+Output format:
+  {"text": "...", "targets": [{"metric": "SCOPE_1", "value": ..., "unit": "..."}]}
 """
 
 import json
@@ -12,7 +23,7 @@ from datetime import datetime
 
 METRIC_DEFINITIONS = {
     # Environmental Metrics
-    "GHG_SCOPE_1": {
+    "SCOPE_1": {
         "category": "Environmental",
         "synonyms": [
             "Scope 1 emissions", "direct emissions", "onsite emissions",
@@ -25,7 +36,7 @@ METRIC_DEFINITIONS = {
         "value_range": (10000, 5000000),
         "distribution": "lognormal"
     },
-    "GHG_SCOPE_2": {
+    "SCOPE_2": {
         "category": "Environmental",
         "synonyms": [
             "Scope 2 emissions", "indirect emissions", "purchased electricity emissions",
@@ -38,7 +49,7 @@ METRIC_DEFINITIONS = {
         "value_range": (5000, 3000000),
         "distribution": "lognormal"
     },
-    "GHG_SCOPE_3": {
+    "SCOPE_3": {
         "category": "Environmental",
         "synonyms": [
             "Scope 3 emissions", "value chain emissions", "supply chain emissions",
@@ -51,30 +62,6 @@ METRIC_DEFINITIONS = {
         "value_range": (50000, 10000000),
         "distribution": "lognormal"
     },
-    "TOTAL_GHG": {
-        "category": "Environmental",
-        "synonyms": [
-            "total GHG emissions", "total emissions", "total greenhouse gas emissions",
-            "combined emissions", "overall carbon footprint", "aggregate emissions",
-            "total carbon emissions", "total CO2 equivalent", "total carbon footprint",
-            "net emissions"
-        ],
-        "units": ["tonnes CO2e", "tCO2e", "million tonnes CO2e", "Mt CO2e", "kg CO2e"],
-        "value_range": (100000, 15000000),
-        "distribution": "lognormal"
-    },
-    "CARBON_INTENSITY": {
-        "category": "Environmental",
-        "synonyms": [
-            "carbon intensity", "emissions intensity", "CO2 intensity",
-            "carbon footprint per unit", "GHG intensity", "emission factor",
-            "specific emissions", "normalized emissions", "emissions per revenue",
-            "emissions per employee"
-        ],
-        "units": ["tCO2e/million USD", "kg CO2e/unit", "tonnes/revenue", "tCO2e/FTE", "kg/m2"],
-        "value_range": (0.5, 500),
-        "distribution": "uniform"
-    },
     "ENERGY_CONSUMPTION": {
         "category": "Environmental",
         "synonyms": [
@@ -86,19 +73,6 @@ METRIC_DEFINITIONS = {
         "units": ["MWh", "GWh", "GJ", "TJ", "kWh"],
         "value_range": (10000, 5000000),
         "distribution": "lognormal"
-    },
-    "RENEWABLE_ENERGY_PCT": {
-        "category": "Environmental",
-        "synonyms": [
-            "renewable energy percentage", "renewable energy share", "clean energy ratio",
-            "renewable power percentage", "green energy proportion", "renewable mix",
-            "clean energy percentage", "renewables share", "sustainable energy ratio",
-            "green power percentage", "RE percentage", "RE%", "renewable energy %",
-            "RES percentage", "clean power mix"
-        ],
-        "units": ["%", "percent", "percentage", "% of total energy"],
-        "value_range": (0, 100),
-        "distribution": "beta"
     },
     "WATER_USAGE": {
         "category": "Environmental",
@@ -122,80 +96,6 @@ METRIC_DEFINITIONS = {
         "value_range": (100, 500000),
         "distribution": "lognormal"
     },
-    "WASTE_RECYCLED_PCT": {
-        "category": "Environmental",
-        "synonyms": [
-            "waste recycled percentage", "recycling rate", "waste diverted from landfill",
-            "recycling percentage", "waste recovery rate", "diversion rate",
-            "recycled waste ratio", "waste reused percentage", "circular waste percentage",
-            "landfill diversion rate"
-        ],
-        "units": ["%", "percent", "percentage"],
-        "value_range": (10, 95),
-        "distribution": "beta"
-    },
-    "EMPLOYEE_COUNT": {
-        "category": "Social",
-        "synonyms": [
-            "employee count", "total employees", "workforce size", "headcount",
-            "staff count", "full-time equivalents", "FTE count", "total workforce",
-            "number of employees", "team size"
-        ],
-        "units": ["employees", "FTE", "headcount", "people", ""],
-        "value_range": (100, 100000),
-        "distribution": "lognormal"
-    },
-    "GENDER_DIVERSITY_PCT": {
-        "category": "Social",
-        "synonyms": [
-            "gender diversity percentage", "female representation", "women in workforce",
-            "gender balance", "female employees percentage", "women representation",
-            "gender parity", "female participation rate", "women in leadership",
-            "female workforce ratio", "D&I gender metric", "DEI gender ratio",
-            "women %", "female %", "gender diversity ratio"
-        ],
-        "units": ["%", "percent", "percentage", "% female"],
-        "value_range": (15, 65),
-        "distribution": "beta"
-    },
-    "TRAINING_HOURS": {
-        "category": "Social",
-        "synonyms": [
-            "training hours", "employee development hours", "learning hours",
-            "training time", "professional development hours", "average training hours",
-            "hours of training per employee", "L&D hours", "skill development hours",
-            "total training hours", "learning and development hours", "training hours/FTE",
-            "avg training hours", "development hours per employee"
-        ],
-        "units": ["hours", "hours/employee", "hours per FTE", "training hours", "hrs/FTE", ""],
-        "value_range": (10, 120),
-        "distribution": "uniform"
-    },
-    "INJURY_RATE": {
-        "category": "Social",
-        "synonyms": [
-            "injury rate", "lost time injury rate", "LTIR", "TRIR",
-            "total recordable incident rate", "workplace injury frequency",
-            "accident rate", "safety incident rate", "injury frequency rate",
-            "recordable injuries per million hours", "OSHA rate", "TRI rate",
-            "LTIFR", "lost time injury frequency rate", "recordable injury rate"
-        ],
-        "units": ["per 200,000 hours", "incidents/million hours", "rate", "per 100 FTE", ""],
-        "value_range": (0.1, 5.0),
-        "distribution": "uniform"
-    },
-    "EMPLOYEE_TURNOVER_PCT": {
-        "category": "Social",
-        "synonyms": [
-            "employee turnover percentage", "turnover rate", "attrition rate",
-            "staff turnover", "employee attrition", "voluntary turnover",
-            "retention rate inverse", "churn rate", "separation rate",
-            "employee departure rate"
-        ],
-        "units": ["%", "percent", "percentage"],
-        "value_range": (5, 35),
-        "distribution": "beta"
-    },
     "ESG_SCORE": {
         "category": "Governance",
         "synonyms": [
@@ -209,67 +109,6 @@ METRIC_DEFINITIONS = {
         "value_range": (30, 95),
         "distribution": "beta"
     },
-    "ENVIRONMENTAL_SCORE": {
-        "category": "Governance",
-        "synonyms": [
-            "environmental score", "E score", "environmental rating",
-            "environmental pillar score", "environmental performance score",
-            "environmental assessment", "ecological rating", "green score",
-            "environmental index", "E pillar rating"
-        ],
-        "units": ["score", "rating", "points", ""],
-        "value_range": (25, 95),
-        "distribution": "beta"
-    },
-    "SOCIAL_SCORE": {
-        "category": "Governance",
-        "synonyms": [
-            "social score", "S score", "social rating", "social pillar score",
-            "social performance score", "social responsibility score",
-            "S pillar rating", "social impact score", "people score",
-            "social assessment"
-        ],
-        "units": ["score", "rating", "points", ""],
-        "value_range": (25, 95),
-        "distribution": "beta"
-    },
-    "GOVERNANCE_SCORE": {
-        "category": "Governance",
-        "synonyms": [
-            "governance score", "G score", "corporate governance rating",
-            "governance pillar score", "governance performance score",
-            "G pillar rating", "governance index", "corporate governance score",
-            "governance assessment", "leadership score"
-        ],
-        "units": ["score", "rating", "points", ""],
-        "value_range": (30, 95),
-        "distribution": "beta"
-    },
-    "BOARD_INDEPENDENCE_PCT": {
-        "category": "Governance",
-        "synonyms": [
-            "board independence percentage", "independent directors ratio",
-            "board independence", "independent board members percentage",
-            "non-executive directors percentage", "independent director ratio",
-            "board independence rate", "outside directors percentage",
-            "independent board composition", "external directors ratio"
-        ],
-        "units": ["%", "percent", "percentage"],
-        "value_range": (40, 95),
-        "distribution": "beta"
-    },
-    "ETHICS_VIOLATIONS": {
-        "category": "Governance",
-        "synonyms": [
-            "ethics violations", "compliance breaches", "code of conduct violations",
-            "ethical incidents", "misconduct cases", "integrity violations",
-            "reported ethics cases", "compliance incidents", "policy violations",
-            "ethical breaches reported"
-        ],
-        "units": ["cases", "incidents", "violations", ""],
-        "value_range": (0, 50),
-        "distribution": "poisson"
-    }
 }
 
 # ==================== TEXT TEMPLATES ====================
@@ -322,6 +161,59 @@ SENTENCE_TEMPLATES = [
     "According to our verified data, {metric1} equaled {value1} {unit1} and {metric2} was {value2} {unit2} in {year}.",
     "Audited results show {metric1}: {value1} {unit1}, {metric2}: {value2} {unit2}, {metric3}: {value3} {unit3}.",
     "Third-party assessment confirmed {metric1} at {value1} {unit1} and {metric2} at {value2} {unit2}.",
+]
+
+# ==================== BROKEN TEXT TEMPLATES (CHANGE 2) ====================
+
+BROKEN_TEMPLATES = [
+    "{metric1}\n{value1} {unit1}",
+    "{metric1} – {value1}",
+    "{metric1} ({unit1}) {value1}",
+    "{metric1} : {value1}",
+    "{metric1}\t{value1} {unit1}",
+    "{metric1}  -  {value1} {unit1}",
+    "{metric1}\n  {value1}\n  {unit1}",
+    "{value1} {unit1} ({metric1})",
+    "{metric1} .... {value1} {unit1}",
+    "{metric1} | {value1}",
+]
+
+# ==================== NOISE INSERTIONS (CHANGE 3) ====================
+
+NOISE_INSERTIONS = [
+    "(Refer Note 12)",
+    "(See page 45)",
+    "(As per GHG Protocol)",
+    "(Audited)",
+    "(Unaudited)",
+    "(Restated)",
+    "(Provisional)",
+    "(Scope as defined in GRI 305)",
+    "(Including subsidiaries)",
+    "(Excluding JVs)",
+    "(Refer Annexure A)",
+    "(As on 31 March 2023)",
+    "*",
+    "**",
+    "(i)",
+    "(ii)",
+]
+
+# ==================== MISLEADING DISTRACTOR NUMBERS (CHANGE 7) ====================
+
+MISLEADING_DISTRACTORS = [
+    "Total employees: {n}",
+    "Revenue: INR {n} crore",
+    "Operating profit margin: {pct}%",
+    "Number of offices: {small}",
+    "CSR spend: INR {n} lakh",
+    "Page {page} of {pages}",
+    "GRI {gri}-{sub}",
+    "FY20{fy1}-{fy2}",
+    "Board strength: {small} members",
+    "EBITDA: {n} million",
+    "{n} locations across {small} countries",
+    "Dividend per share: INR {div}",
 ]
 
 NOISE_PHRASES = [
@@ -385,16 +277,13 @@ def generate_value(metric_key: str) -> float:
     if distribution == "uniform":
         value = random.uniform(min_val, max_val)
     elif distribution == "lognormal":
-        # Lognormal for skewed distributions (emissions, energy)
         mu = (min_val + max_val) / 2
         sigma = (max_val - min_val) / 6
         value = random.lognormvariate(0, 1) * sigma + min_val
         value = min(max(value, min_val), max_val)
     elif distribution == "beta":
-        # Beta distribution for percentages
         value = random.betavariate(2, 2) * (max_val - min_val) + min_val
     elif distribution == "poisson":
-        # Poisson for count data
         lambda_param = (min_val + max_val) / 2
         value = min(random.expovariate(1/lambda_param) if lambda_param > 0 else 0, max_val)
     else:
@@ -402,33 +291,157 @@ def generate_value(metric_key: str) -> float:
     
     # Apply rounding based on magnitude
     if value > 10000:
-        return round(value, -2)  # Round to nearest 100
+        return round(value, -2)
     elif value > 100:
         return round(value, 0)
     else:
         return round(value, 2)
 
+
+# ==================== CHANGE 5: FORMAT VARIATIONS ====================
+
+def format_number(value: float) -> str:
+    """Format numbers in varied ways to mimic real-world report diversity"""
+    formats = [
+        f"{int(value)}",              # plain integer
+        f"{int(value):,}",             # comma separated
+        f"{value:.2f}",               # two decimal places
+        f"{value/1000:.1f}k",         # shorthand thousands
+    ]
+    # Add million/lakh shorthand for large numbers
+    if value >= 1_000_000:
+        formats.append(f"{value/1_000_000:.2f} million")
+    if value >= 100_000:
+        formats.append(f"{value/100_000:.2f} lakh")
+    
+    return random.choice(formats)
+
+
 def format_value_with_uncertainty(value: float) -> Tuple[str, float]:
-    """Add realistic uncertainty markers"""
+    """Add realistic uncertainty markers + number format variations"""
+    # Use format_number for diverse representations
+    value_str = format_number(value)
+    
     uncertainty_type = random.choices(
         ["exact", "approx", "nearly", "around", "over", "under"],
         weights=[0.6, 0.15, 0.1, 0.1, 0.025, 0.025]
     )[0]
     
     if uncertainty_type == "exact":
-        return str(value), value
+        return value_str, value
     elif uncertainty_type == "approx":
-        return f"approximately {value}", value
+        return f"approximately {value_str}", value
     elif uncertainty_type == "nearly":
-        return f"nearly {value}", value
+        return f"nearly {value_str}", value
     elif uncertainty_type == "around":
-        return f"around {value}", value
+        return f"around {value_str}", value
     elif uncertainty_type == "over":
         adjusted = value * 1.05
-        return f"over {value}", adjusted
+        return f"over {value_str}", adjusted
     else:  # under
         adjusted = value * 0.95
-        return f"under {value}", adjusted
+        return f"under {value_str}", adjusted
+
+
+# ==================== CHANGE 6: OCR NOISE + BAD SPACING ====================
+
+def corrupt_text(text: str) -> str:
+    """Add realistic OCR/PDF extraction noise"""
+    # Random extra spacing (30%)
+    if random.random() < 0.3:
+        words = text.split(' ')
+        corrupt_idx = random.randint(0, max(0, len(words) - 2))
+        space = random.choice(['  ', '   ', '\n'])
+        words[corrupt_idx] = words[corrupt_idx] + space
+        text = ' '.join(words)
+    
+    # Random character substitution — OCR errors (10%)
+    if random.random() < 0.1:
+        ocr_map = {'O': '0', 'l': '1', 'I': '1', 'S': '5', 'B': '8'}
+        chars = list(text)
+        for i, c in enumerate(chars):
+            if c in ocr_map and random.random() < 0.05:  # 5% per char
+                chars[i] = ocr_map[c]
+                break  # Only one OCR error per text
+        text = ''.join(chars)
+    
+    return text
+
+
+# ==================== CHANGE 1: TABLE GENERATION ====================
+
+def generate_table_format(metrics: List[Dict], year: int) -> str:
+    """Generate markdown-style table format mimicking real ESG reports"""
+    fy_current = f"FY{str(year)[2:]}"
+    fy_previous = f"FY{str(year - 1)[2:]}"
+    
+    table_style = random.choice(['markdown', 'pipe', 'spaced', 'csv'])
+    
+    if table_style == 'markdown':
+        header = f"| Metric | {fy_current} | {fy_previous} |\n|--------|------|------|\n"
+        rows = ""
+        for m in metrics:
+            val1 = int(m["value"])
+            val2 = int(val1 * random.uniform(0.8, 1.2))
+            rows += f"| {m['metric']} | {val1:,} {m['unit']} | {val2:,} {m['unit']} |\n"
+        return header + rows
+    
+    elif table_style == 'pipe':
+        rows = ""
+        for m in metrics:
+            val1 = format_number(m["value"])
+            rows += f"{m['metric']} | {val1} {m['unit']}\n"
+        return rows
+    
+    elif table_style == 'spaced':
+        rows = f"{'Indicator':<40} {fy_current:>15} {fy_previous:>15}\n"
+        rows += "-" * 70 + "\n"
+        for m in metrics:
+            val1 = int(m["value"])
+            val2 = int(val1 * random.uniform(0.85, 1.15))
+            rows += f"{m['metric']:<40} {val1:>15,} {val2:>15,}\n"
+        return rows
+    
+    else:  # csv
+        header = f"Metric,{fy_current},Unit\n"
+        rows = ""
+        for m in metrics:
+            rows += f"{m['metric']},{format_number(m['value'])},{m['unit']}\n"
+        return header + rows
+
+
+# ==================== CHANGE 4: MULTI-VALUE CONFUSION ====================
+
+def add_multiple_values(text: str, value: float) -> str:
+    """Add a second (older) value to create multi-value confusion"""
+    old = int(value * random.uniform(1.05, 1.2))
+    patterns = [
+        f"{text} reduced from {old:,} to {int(value):,}",
+        f"{text} (previous year: {old:,})",
+        f"{text}, down from {old:,} in the prior period",
+        f"{text} compared to {old:,} last year",
+        f"{text} — a decrease from {old:,}",
+    ]
+    return random.choice(patterns)
+
+
+# ==================== CHANGE 7: MISLEADING DISTRACTORS ====================
+
+def generate_distractor() -> str:
+    """Generate a misleading number that the model must learn to ignore"""
+    template = random.choice(MISLEADING_DISTRACTORS)
+    return template.format(
+        n=random.randint(1000, 50000),
+        pct=round(random.uniform(5, 40), 1),
+        small=random.randint(5, 50),
+        page=random.randint(1, 200),
+        pages=random.randint(50, 300),
+        gri=random.choice([305, 306, 302, 303, 401, 403, 404]),
+        sub=random.randint(1, 5),
+        fy1=random.randint(22, 24),
+        fy2=random.randint(23, 25),
+        div=round(random.uniform(5, 100), 2),
+    )
 
 # ==================== SAMPLE GENERATION ====================
 
@@ -437,13 +450,11 @@ def select_metrics_for_sample(num_metrics: int) -> List[str]:
     
     # Define metric groups that often appear together
     metric_groups = [
-        ["GHG_SCOPE_1", "GHG_SCOPE_2", "GHG_SCOPE_3", "TOTAL_GHG"],
-        ["ENERGY_CONSUMPTION", "RENEWABLE_ENERGY_PCT", "CARBON_INTENSITY"],
-        ["WATER_USAGE", "WASTE_GENERATED", "WASTE_RECYCLED_PCT"],
-        ["EMPLOYEE_COUNT", "GENDER_DIVERSITY_PCT", "TRAINING_HOURS"],
-        ["INJURY_RATE", "EMPLOYEE_TURNOVER_PCT", "TRAINING_HOURS"],
-        ["ESG_SCORE", "ENVIRONMENTAL_SCORE", "SOCIAL_SCORE", "GOVERNANCE_SCORE"],
-        ["BOARD_INDEPENDENCE_PCT", "ETHICS_VIOLATIONS", "GOVERNANCE_SCORE"],
+        ["SCOPE_1", "SCOPE_2", "SCOPE_3"],
+        ["ENERGY_CONSUMPTION", "WATER_USAGE", "WASTE_GENERATED"],
+        ["SCOPE_1", "SCOPE_2", "ENERGY_CONSUMPTION"],
+        ["WASTE_GENERATED", "WATER_USAGE", "ESG_SCORE"],
+        ["SCOPE_1", "SCOPE_2", "SCOPE_3", "ESG_SCORE"],
     ]
     
     # 70% chance of using a coherent group, 30% random mix
@@ -477,73 +488,138 @@ def generate_metric_object(metric_key: str, year: int) -> Dict:
         "category": config["category"]
     }
 
-def generate_text_from_metrics(metrics: List[Dict], year: int) -> str:
-    """Generate realistic text containing the metrics"""
-    
-    # Select template based on number of metrics
+def _generate_clean_sentence(metrics: List[Dict], year: int) -> str:
+    """Generate a clean sentence-based text (original approach)"""
     num_metrics = len(metrics)
     
     if num_metrics == 2:
-        template = random.choice([t for t in SENTENCE_TEMPLATES if t.count("{metric") == 2])
+        templates = [t for t in SENTENCE_TEMPLATES if t.count("{metric") == 2]
     elif num_metrics == 3:
-        template = random.choice([t for t in SENTENCE_TEMPLATES if t.count("{metric") == 3])
+        templates = [t for t in SENTENCE_TEMPLATES if t.count("{metric") == 3]
     elif num_metrics == 4:
-        template = random.choice([t for t in SENTENCE_TEMPLATES if t.count("{metric") == 4])
+        templates = [t for t in SENTENCE_TEMPLATES if t.count("{metric") == 4]
     else:
-        # For 5+ metrics, use multiple sentences
-        template = random.choice([t for t in SENTENCE_TEMPLATES if t.count("{metric") <= 2])
+        templates = [t for t in SENTENCE_TEMPLATES if t.count("{metric") <= 2]
     
-    # Prepare substitution dict
+    template = random.choice(templates) if templates else SENTENCE_TEMPLATES[0]
+    
     subs = {"year": year}
-    
-    for i, metric in enumerate(metrics[:4], 1):  # Limit to 4 metrics per template
+    for i, metric in enumerate(metrics[:4], 1):
         value_str, actual_value = format_value_with_uncertainty(metric["value"])
-        
         subs[f"metric{i}"] = metric["metric"]
         subs[f"value{i}"] = value_str
         subs[f"unit{i}"] = metric["unit"]
         subs[f"verb{i}"] = random.choice(["was", "totaled", "reached", "stood at", "amounted to"])
-        
-        # Update the actual value in case uncertainty changed it
         metric["value"] = actual_value
     
-    # Generate base text
     try:
         text = template.format(**subs)
     except KeyError:
-        # Fallback for complex templates
         text = f"In {year}, "
         for i, m in enumerate(metrics):
             if i > 0:
                 text += ", and " if i == len(metrics) - 1 else ", "
-            text += f"{m['metric']} was {m['value']} {m['unit']}"
+            text += f"{m['metric']} was {format_number(m['value'])} {m['unit']}"
         text += "."
     
-    # Add noise (50% chance)
-    if random.random() < 0.5:
-        noise_type = random.choice(["prefix", "suffix", "inline"])
-        
-        if noise_type == "prefix":
-            text = random.choice(NOISE_PHRASES) + " " + text
-        elif noise_type == "suffix":
-            text = text + " " + random.choice(CONTEXTUAL_NOISE)
-        else:  # inline
-            parts = text.split(". ")
-            if len(parts) > 1:
-                insert_pos = random.randint(0, len(parts) - 1)
-                parts.insert(insert_pos, random.choice(TRANSITION_PHRASES))
-                text = " ".join(parts)
-    
-    # Add extra metrics in separate sentences (for 5-metric samples)
+    # Extra metrics beyond 4
     if len(metrics) > 4:
-        extra_metrics = metrics[4:]
-        for m in extra_metrics:
-            text += f" {random.choice(TRANSITION_PHRASES)} {m['metric']} reached {m['value']} {m['unit']}."
+        for m in metrics[4:]:
+            text += f" {random.choice(TRANSITION_PHRASES)} {m['metric']} reached {format_number(m['value'])} {m['unit']}."
+    
+    return text
+
+
+def _generate_broken_text(metrics: List[Dict], year: int) -> str:
+    """Generate broken/fragmented text mimicking PDF extraction artifacts"""
+    parts = []
+    for m in metrics:
+        template = random.choice(BROKEN_TEMPLATES)
+        subs = {
+            "metric1": m["metric"],
+            "value1": format_number(m["value"]),
+            "unit1": m["unit"],
+        }
+        try:
+            parts.append(template.format(**subs))
+        except KeyError:
+            parts.append(f"{m['metric']} {format_number(m['value'])} {m['unit']}")
+    
+    separator = random.choice(["\n", "\n\n", " | ", "   "])
+    return separator.join(parts)
+
+
+def generate_text_from_metrics(metrics: List[Dict], year: int) -> str:
+    """
+    Generate realistic text containing the metrics.
+    
+    Distribution:
+      - 30% clean sentences
+      - 25% tables
+      - 20% broken text
+      - 15% noisy paragraphs (clean + heavy noise + distractors)
+      - 10% multi-value confusion
+    """
+    roll = random.random()
+    
+    # ---- 25% TABLE FORMAT (CHANGE 1) ----
+    if roll < 0.25:
+        text = generate_table_format(metrics, year)
+        text_type = "table"
+    
+    # ---- 20% BROKEN TEXT (CHANGE 2) ----
+    elif roll < 0.45:
+        text = _generate_broken_text(metrics, year)
+        text_type = "broken"
+    
+    # ---- 10% MULTI-VALUE CONFUSION (CHANGE 4) ----
+    elif roll < 0.55:
+        text = _generate_clean_sentence(metrics, year)
+        # Add old/comparison values for the first metric
+        text = add_multiple_values(text, metrics[0]["value"])
+        text_type = "multi_value"
+    
+    # ---- 15% NOISY PARAGRAPHS (clean + heavy noise + distractors) ----
+    elif roll < 0.70:
+        text = _generate_clean_sentence(metrics, year)
+        # Prefix noise
+        text = random.choice(NOISE_PHRASES) + " " + text
+        # Suffix noise
+        text = text + " " + random.choice(CONTEXTUAL_NOISE)
+        # Add distractor numbers (CHANGE 7)
+        text += " " + generate_distractor()
+        text_type = "noisy"
+    
+    # ---- 30% CLEAN SENTENCES ----
+    else:
+        text = _generate_clean_sentence(metrics, year)
+        # Light noise (50% of clean gets a small addition)
+        if random.random() < 0.5:
+            noise_type = random.choice(["prefix", "suffix", "inline"])
+            if noise_type == "prefix":
+                text = random.choice(NOISE_PHRASES) + " " + text
+            elif noise_type == "suffix":
+                text = text + " " + random.choice(CONTEXTUAL_NOISE)
+            else:
+                parts = text.split(". ")
+                if len(parts) > 1:
+                    insert_pos = random.randint(0, len(parts) - 1)
+                    parts.insert(insert_pos, random.choice(TRANSITION_PHRASES))
+                    text = " ".join(parts)
+        text_type = "clean"
+    
+    # ---- CHANGE 3: Noise annotations (30% of all) ----
+    if random.random() < 0.3:
+        text += " " + random.choice(NOISE_INSERTIONS)
+    
+    # ---- CHANGE 6: OCR/spacing corruption (15% of all) ----
+    if random.random() < 0.15:
+        text = corrupt_text(text)
     
     return text
 
 def generate_sample(sample_id: int) -> Dict:
-    """Generate a complete sample with text and labeled metrics"""
+    """Generate a complete sample with text and labeled targets"""
     
     # Select year (2018-2023)
     year = random.randint(2018, 2023)
@@ -560,8 +636,19 @@ def generate_sample(sample_id: int) -> Dict:
     # Generate text
     text = generate_text_from_metrics(metrics, year)
     
+    # Build targets (upgraded output structure)
+    targets = []
+    for m in metrics:
+        targets.append({
+            "metric": m["normalized_metric"],
+            "value": m["value"],
+            "unit": m["unit"],
+        })
+    
     return {
         "text": text,
+        "targets": targets,
+        # Keep full metrics for backward compatibility with phase1
         "metrics": metrics,
         "year": year
     }
@@ -600,29 +687,29 @@ def generate_dataset(num_samples: int = 55000, output_file: str = "esg_dataset.j
     print(f"Total samples: {len(dataset):,}")
     print(f"File size: {len(json.dumps(dataset)) / 1024 / 1024:.2f} MB")
     
-    # Metric distribution
+    # Metric distribution (from targets)
     metric_counts = {}
     for sample in dataset:
-        for metric in sample["metrics"]:
-            norm_metric = metric["normalized_metric"]
-            metric_counts[norm_metric] = metric_counts.get(norm_metric, 0) + 1
+        for target in sample["targets"]:
+            metric_counts[target["metric"]] = metric_counts.get(target["metric"], 0) + 1
     
-    print("\nMetric coverage:")
+    print("\nMetric coverage (from targets):")
     for metric, count in sorted(metric_counts.items()):
         print(f"  {metric}: {count:,} occurrences")
     
     # Category distribution
-    category_counts = {"Environmental": 0, "Social": 0, "Governance": 0}
+    category_counts = {"Environmental": 0, "Governance": 0}
     for sample in dataset:
         for metric in sample["metrics"]:
-            category_counts[metric["category"]] += 1
+            cat = metric["category"]
+            category_counts[cat] = category_counts.get(cat, 0) + 1
     
     print("\nCategory distribution:")
-    for cat, count in category_counts.items():
+    for cat, count in sorted(category_counts.items()):
         print(f"  {cat}: {count:,} occurrences")
     
-    # Metrics per sample distribution
-    metrics_per_sample = [len(s["metrics"]) for s in dataset]
+    # Metrics per sample
+    metrics_per_sample = [len(s["targets"]) for s in dataset]
     print(f"\nMetrics per sample:")
     print(f"  Average: {sum(metrics_per_sample) / len(metrics_per_sample):.2f}")
     print(f"  Min: {min(metrics_per_sample)}")
@@ -631,27 +718,36 @@ def generate_dataset(num_samples: int = 55000, output_file: str = "esg_dataset.j
     # Year distribution
     year_counts = {}
     for sample in dataset:
-        year = sample["year"]
-        year_counts[year] = year_counts.get(year, 0) + 1
+        year_counts[sample["year"]] = year_counts.get(sample["year"], 0) + 1
     
     print("\nYear distribution:")
     for year, count in sorted(year_counts.items()):
         print(f"  {year}: {count:,} samples")
     
+    # Text type distribution (approximate from structure)
+    print("\nText type distribution (target):")
+    print("  Clean sentences: ~30%")
+    print("  Tables: ~25%")
+    print("  Broken text: ~20%")
+    print("  Noisy paragraphs: ~15%")
+    print("  Multi-value confusion: ~10%")
+    
     print("\n" + "="*60)
     print("Sample examples:")
     print("="*60)
-    for i in range(3):
+    for i in range(5):
         sample = dataset[i]
-        print(f"\nSample {i+1}:")
-        print(f"Text: {sample['text'][:200]}...")
-        print(f"Metrics: {len(sample['metrics'])} extracted")
-        for m in sample['metrics']:
-            print(f"  - {m['normalized_metric']}: {m['value']} {m['unit']}")
+        print(f"\n{'─'*60}")
+        print(f"Sample {i+1}:")
+        print(f"Text: {sample['text'][:300]}")
+        print(f"Targets ({len(sample['targets'])}):")
+        for t in sample['targets']:
+            print(f"  → {t['metric']}: {t['value']} {t['unit']}")
     
     print("\n" + "="*60)
     print(f"✓ Dataset generation complete!")
     print(f"✓ Output saved to: {output_file}")
+    print(f"✓ Format: {{text, targets[{{metric, value, unit}}], metrics, year}}")
     print("="*60)
 
 if __name__ == "__main__":

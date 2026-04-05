@@ -36,6 +36,14 @@ from pathlib import Path
 import re
 
 
+# TARGET METRICS — only these 7 metrics are used across the pipeline
+TARGET_METRICS = {
+    'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
+    'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
+    'ESG_SCORE',
+}
+
+
 # ============================================================================
 # LAYER 4: ESG CANDIDATE FILTER (NEW)
 # ============================================================================
@@ -196,10 +204,27 @@ class ESGNERDataset(Dataset):
         print(f"✓ Found {len(self.label_list)} unique labels")
     
     def _build_label_list(self) -> List[str]:
+        """Build label list from target metrics only"""
         labels = set(['O'])
-        for sample in self.data:
-            labels.update(sample['tags'])
+        for metric in TARGET_METRICS:
+            labels.add(f'B-{metric}')
+            labels.add(f'I-{metric}')
         return sorted(list(labels))
+    
+    def _filter_tags_to_target(self, tags: List[str]) -> List[str]:
+        """Relabel non-target metric tags to 'O'"""
+        filtered = []
+        for tag in tags:
+            if tag == 'O':
+                filtered.append('O')
+            else:
+                # Extract metric name from B-METRIC or I-METRIC
+                prefix, metric = tag.split('-', 1)
+                if metric in TARGET_METRICS:
+                    filtered.append(tag)
+                else:
+                    filtered.append('O')
+        return filtered
     
     def __len__(self):
         return len(self.data)
@@ -207,7 +232,7 @@ class ESGNERDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.data[idx]
         tokens = sample['tokens']
-        tags = sample['tags']
+        tags = self._filter_tags_to_target(sample['tags'])
         
         tokenized = self.tokenizer(
             tokens,
@@ -348,6 +373,9 @@ class MetricClassificationDataset(Dataset):
     def __init__(self, data_path: str, tokenizer, max_length: int = 128):
         with open(data_path, 'r') as f:
             self.data = json.load(f)
+        
+        # Filter to target metrics only
+        self.data = [d for d in self.data if d['label'] in TARGET_METRICS]
         
         self.tokenizer = tokenizer
         self.max_length = max_length
