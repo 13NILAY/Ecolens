@@ -1,17 +1,25 @@
 """
-ESG EXTRACTION - PDF EVALUATION SCRIPT v8.0 (TOTAL-ONLY ESG INTELLIGENCE)
+ESG EXTRACTION - PDF EVALUATION SCRIPT v9.0 (RECOVERY MODE + MULTI-STAGE)
 ================================================================================
 
-Based on v7.1 with critical improvements for total-value extraction:
+Based on v8.0 with RECOVERY MODE fixes for maximum recall:
   ✅ FIX 33: TABLE OVERRIDE — If metric exists in table, ignore paragraph values
   ✅ FIX 34: TOTAL ROW DETECTION — Only accept rows containing total/grand total/overall or last row
-  ✅ FIX 35: VALUE SCALE VALIDATION — Minimum thresholds: Scope1/2≥1000, Scope3≥10000, Water≥100000, Energy≥1e8 MJ
+  ✅ FIX 35: VALUE SCALE VALIDATION — Minimum thresholds (RELAXED in v9.0)
   ✅ FIX 36: STRICT UNIT VALIDATION — Waste→tonnes/kg, Emissions→tCO2e, Energy→MJ/kWh, Water→KL/m3
   ✅ FIX 37: PARAGRAPH FILTER — Reject if contains intervention/saved/reduced/initiative
   ✅ FIX 38: ESG SCORE HARD FILTER — Only if explicitly "ESG score" or "rating"
   ✅ FIX 39: CONFIDENCE CORRECTION — Table+total=0.9+, table only=0.7, paragraph max 0.6
 
-All previous fixes (1-32) retained.
+  🔥 FIX 40: TABLE PARSER RELAXATION — Accept scope/energy/water/waste rows (not just total)
+  🔥 FIX 41: FALLBACK IF TABLE FAILS — Re-enable paragraph extraction when table yields 0
+  🔥 FIX 42: PARTIAL TABLE ACCEPTANCE — Extract first numeric even if header unclear
+  🔥 FIX 43: RELAXED VALUE THRESHOLDS — Lower minimums to avoid rejecting valid data
+  🔥 FIX 44: DISABLE TABLE OVERRIDE WHEN EMPTY — Don't block text if table has 0 metrics
+  🔥 FIX 45: DEBUG LOGGING — Print why table rows are rejected
+  🔥 FIX 46: MULTI-STAGE EXTRACTION — Progressive relaxation strategy
+
+All previous fixes (1-39) retained.
 
 Usage:
     python evaluate_on_pdf.py --pdf_path "path/to/esg_report.pdf"
@@ -223,21 +231,33 @@ CANONICAL_UNIT: Dict[str, str] = {
 
 KG_TO_TONNE_METRICS: Set[str] = {'SCOPE_1', 'SCOPE_2', 'SCOPE_3', 'WASTE_GENERATED'}
 
-# ✅ FIX 35: Minimum value thresholds (after unit normalization to base units)
+# ✅ FIX 35 + 🔥 FIX 43: Minimum value thresholds (RELAXED for recovery mode)
+# Stage 1 (strict) uses these; Stage 2 (relaxed) uses RELAXED_MIN_VALUES
 MIN_VALUES = {
-    'SCOPE_1': 1000,      # tonnes CO2e
-    'SCOPE_2': 1000,
-    'SCOPE_3': 10000,
-    'WATER_USAGE': 100000,  # KL
-    'ENERGY_CONSUMPTION': 100_000_000,  # MJ (1e8 MJ)
-    'WASTE_GENERATED': 1000,  # tonnes
+    'SCOPE_1': 500,       # was 1000 — relaxed to avoid rejecting valid SME data
+    'SCOPE_2': 500,       # was 1000
+    'SCOPE_3': 5000,      # was 10000
+    'WATER_USAGE': 50000,   # was 100000 KL
+    'ENERGY_CONSUMPTION': 1_000_000,  # was 1e8 MJ — relaxed to 1e6
+    'WASTE_GENERATED': 500,   # was 1000 tonnes
     'ESG_SCORE': 0,       # no minimum
 }
 
-# ✅ FIX 39: Confidence base values
-CONFIDENCE_TABLE_TOTAL = 0.95
-CONFIDENCE_TABLE_ONLY = 0.75
-CONFIDENCE_PARAGRAPH_MAX = 0.60
+# 🔥 FIX 43: Stage 2 relaxed thresholds
+RELAXED_MIN_VALUES = {
+    'SCOPE_1': 100,
+    'SCOPE_2': 100,
+    'SCOPE_3': 1000,       # spec: ≥1000
+    'WATER_USAGE': 50000,    # spec: ≥50,000
+    'ENERGY_CONSUMPTION': 1_000_000,  # spec: ≥1e6 MJ
+    'WASTE_GENERATED': 100,
+    'ESG_SCORE': 0,
+}
+
+# ✅ FIX 39: Confidence base values (aligned to spec)
+CONFIDENCE_TABLE_TOTAL = 0.90     # table + strong context (total row)
+CONFIDENCE_TABLE_ONLY = 0.70      # table (no total keyword)
+CONFIDENCE_PARAGRAPH_MAX = 0.50   # paragraph fallback
 
 
 # ============================================================================
@@ -290,6 +310,542 @@ class PDFExtractor:
 
 
 # ============================================================================
+# LAYER 1a: TABLE RECONSTRUCTOR (STRUCTURED EXTRACTION)
+# ============================================================================
+
+class TableReconstructor:
+    """
+    🔥 FIX 47: Table reconstruction + structured extraction pipeline.
+    
+    This is NOT a text extraction problem — it's a table reconstruction problem.
+    
+    Pipeline:
+      1. Extract raw tables from pdfplumber
+      2. Normalize rows (merge split rows)
+      3. Clean each row into a string
+      4. Apply metric-specific extraction rules
+      5. Filter noise
+      6. Use column position rule (first number = current year)
+    """
+    
+    # Metric extraction patterns with priorities
+    SCOPE_PATTERNS = {
+        'SCOPE_1': [
+            re.compile(r'total\s+scope\s*1', re.I),
+            re.compile(r'scope\s*1\s+emission', re.I),
+            re.compile(r'scope\s*-?\s*1', re.I),
+            re.compile(r'direct\s+emission', re.I),
+        ],
+        'SCOPE_2': [
+            re.compile(r'total\s+scope\s*2', re.I),
+            re.compile(r'scope\s*2\s+emission', re.I),
+            re.compile(r'scope\s*-?\s*2', re.I),
+            re.compile(r'indirect\s+emission', re.I),
+        ],
+        'SCOPE_3': [
+            re.compile(r'total\s+scope\s*3', re.I),
+            re.compile(r'scope\s*3\s+emission', re.I),
+            re.compile(r'scope\s*-?\s*3', re.I),
+            re.compile(r'other\s+indirect\s+emission', re.I),
+            re.compile(r'value\s+chain\s+emission', re.I),
+        ],
+    }
+    
+    ENERGY_PATTERNS = [
+        re.compile(r'total\s+electricity\s+consumption', re.I),
+        re.compile(r'total\s+energy\s+consumption', re.I),
+        re.compile(r'total\s+energy', re.I),
+        re.compile(r'electricity\s+consumption', re.I),
+        re.compile(r'energy\s+consumption', re.I),
+    ]
+    
+    WASTE_PATTERNS = [
+        re.compile(r'total\s+waste', re.I),
+        re.compile(r'waste\s+generated', re.I),
+        re.compile(r'hazardous\s+waste', re.I),
+        re.compile(r'non.?hazardous\s+waste', re.I),
+        re.compile(r'other\s+waste', re.I),
+        re.compile(r'plastic\s+waste', re.I),
+        re.compile(r'e.?waste', re.I),
+        re.compile(r'bio.?medical\s+waste', re.I),
+        re.compile(r'construction.*waste', re.I),
+        re.compile(r'battery\s+waste', re.I),
+    ]
+    
+    WATER_PATTERNS = [
+        re.compile(r'total\s+water', re.I),
+        re.compile(r'water\s+withdrawal', re.I),
+        re.compile(r'water\s+consumption', re.I),
+        re.compile(r'groundwater', re.I),
+        re.compile(r'ground\s+water', re.I),
+        re.compile(r'surface\s+water', re.I),
+        re.compile(r'third.?party\s+water', re.I),
+        re.compile(r'municipal\s+water', re.I),
+        re.compile(r'tanker\s+water', re.I),
+        re.compile(r'rainwater', re.I),
+    ]
+    
+    # Reject patterns (intensity, targets, etc.)
+    REJECT_PATTERNS = [
+        re.compile(r'\bper\s+(employee|fte|unit|tonne|kwh|mwh|revenue|capita)', re.I),
+        re.compile(r'\bintensity\b', re.I),
+        re.compile(r'\btarget\b', re.I),
+        re.compile(r'\breduction\b', re.I),
+        re.compile(r'\bprojection\b', re.I),
+        re.compile(r'\bforecast\b', re.I),
+        re.compile(r'\bbaseline\b', re.I),
+        re.compile(r'\bgoal\b', re.I),
+    ]
+    
+    @classmethod
+    def extract_from_pdf(cls, pdf_data: Dict) -> List[Dict]:
+        """
+        Main entry: extract ESG metrics from PDF data using table reconstruction.
+        Returns list of structured metric dicts.
+        """
+        all_rows = []
+        
+        # Step 1: Collect normalized rows from ALL tables
+        for table_info in pdf_data.get('tables', []):
+            raw_table = table_info['table']
+            page_num = table_info['page']
+            normalized = cls._normalize_table(raw_table)
+            for row_str in normalized:
+                all_rows.append({'text': row_str, 'page': page_num})
+        
+        # Also try extracting from page text (text-based tables)
+        for page_info in pdf_data.get('pages', []):
+            text_rows = cls._extract_text_table_rows(page_info['text'])
+            for row_str in text_rows:
+                all_rows.append({'text': row_str, 'page': page_info['page_number']})
+        
+        print(f"    [TableReconstructor] {len(all_rows)} normalized rows collected")
+        
+        # Step 2: Extract metrics using structured rules
+        metrics = {}
+        
+        # Extract scopes
+        for scope_metric, patterns in cls.SCOPE_PATTERNS.items():
+            result = cls._extract_scope(all_rows, patterns, scope_metric)
+            if result:
+                metrics[scope_metric] = result
+                print(f"    ✅ [TR] {scope_metric}: {result['value']} {result['unit']} "
+                      f"(page {result['page']})")
+        
+        # Extract energy
+        energy = cls._extract_energy(all_rows)
+        if energy:
+            metrics['ENERGY_CONSUMPTION'] = energy
+            print(f"    ✅ [TR] ENERGY_CONSUMPTION: {energy['value']} {energy['unit']} "
+                  f"(page {energy['page']})")
+        
+        # Extract waste (aggregation)
+        waste = cls._extract_waste(all_rows)
+        if waste:
+            metrics['WASTE_GENERATED'] = waste
+            print(f"    ✅ [TR] WASTE_GENERATED: {waste['value']} {waste['unit']} "
+                  f"(page {waste['page']})")
+        
+        # Extract water (aggregation)
+        water = cls._extract_water(all_rows)
+        if water:
+            metrics['WATER_USAGE'] = water
+            print(f"    ✅ [TR] WATER_USAGE: {water['value']} {water['unit']} "
+                  f"(page {water['page']})")
+        
+        return list(metrics.values())
+    
+    # ------------------------------------------------------------------
+    # STEP 2: ROW NORMALIZATION
+    # ------------------------------------------------------------------
+    
+    @classmethod
+    def _normalize_table(cls, table: List[List[str]]) -> List[str]:
+        """
+        Normalize raw pdfplumber table:
+        1. Join cells in each row
+        2. Merge split rows (short fragments get merged with next row)
+        """
+        # First: join cells in each row
+        raw_strings = []
+        for row in table:
+            if not row:
+                continue
+            # Join all non-None cells
+            row_text = " ".join([str(cell).strip() for cell in row if cell and str(cell).strip()])
+            if row_text:
+                raw_strings.append(row_text)
+        
+        # Second: merge split rows
+        normalized = []
+        buffer = ""
+        
+        for row_text in raw_strings:
+            if buffer:
+                row_text = buffer + " " + row_text
+                buffer = ""
+            
+            # If row is very short (likely a fragment), buffer it
+            words = row_text.split()
+            has_number = bool(re.search(r'\d', row_text))
+            
+            if len(words) < 3 and not has_number:
+                buffer = row_text
+            else:
+                normalized.append(row_text)
+        
+        # Don't lose the last buffer
+        if buffer:
+            if normalized:
+                normalized[-1] = normalized[-1] + " " + buffer
+            else:
+                normalized.append(buffer)
+        
+        return normalized
+    
+    @classmethod
+    def _extract_text_table_rows(cls, page_text: str) -> List[str]:
+        """Extract table-like rows from page text (for non-grid tables)."""
+        rows = []
+        for line in page_text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            # A table row typically has at least one number
+            if re.search(r'[\d,]+\.?\d*', line):
+                rows.append(line)
+        return rows
+    
+    # ------------------------------------------------------------------
+    # STEP 4: METRIC EXTRACTION
+    # ------------------------------------------------------------------
+    
+    @classmethod
+    def _is_rejected(cls, text: str) -> bool:
+        """Check if row contains intensity/target/reduction patterns."""
+        for pat in cls.REJECT_PATTERNS:
+            if pat.search(text):
+                return True
+        return False
+    
+    @classmethod
+    def _extract_first_valid_number(cls, text: str, min_value: float = 1.0) -> Optional[float]:
+        """
+        Extract the FIRST valid number from text.
+        COLUMN RULE: First number = current year, second = previous year.
+        Skip noise values (page numbers, years, IDs).
+        """
+        numbers = re.findall(r'[\d,]+\.?\d*', text)
+        for num_str in numbers:
+            try:
+                value = float(num_str.replace(",", ""))
+            except ValueError:
+                continue
+            
+            # Noise filtering
+            if value < min_value:
+                continue
+            if 1900 <= value <= 2100:  # Year
+                continue
+            if value in {1, 2, 3, 4, 5, 10}:  # Noise
+                continue
+            
+            return value
+        return None
+    
+    @classmethod
+    def _extract_scope(cls, rows: List[Dict], patterns: List[re.Pattern], 
+                       metric_name: str) -> Optional[Dict]:
+        """
+        Extract scope emission value.
+        Priority: "total scope X" > "scope X emission" > "scope X"
+        Always pick FIRST number (current year).
+        """
+        # Try patterns in priority order
+        for pattern in patterns:
+            for row_info in rows:
+                row_text = row_info['text']
+                
+                if cls._is_rejected(row_text):
+                    continue
+                
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=100)
+                    if value is not None and value >= 100:
+                        # Detect unit
+                        unit = cls._detect_emission_unit(row_text)
+                        
+                        return {
+                            'normalized_metric': metric_name,
+                            'value': value,
+                            'unit': unit,
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Environmental',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_text.lower() else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_energy(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract energy consumption.
+        Look for "total electricity/energy consumption".
+        Ignore small values (< 500).
+        """
+        for pattern in cls.ENERGY_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                
+                if cls._is_rejected(row_text):
+                    continue
+                
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=500)
+                    if value is not None:
+                        unit = cls._detect_energy_unit(row_text)
+                        
+                        return {
+                            'normalized_metric': 'ENERGY_CONSUMPTION',
+                            'value': value,
+                            'unit': unit,
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Environmental',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_text.lower() else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_waste(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract waste: look for 'total waste' first.
+        If not found, SUM all waste-related rows.
+        """
+        # First try: total waste row
+        for row_info in rows:
+            row_text = row_info['text']
+            if cls._is_rejected(row_text):
+                continue
+            if re.search(r'total\s+waste', row_text, re.I):
+                value = cls._extract_first_valid_number(row_text, min_value=10)
+                if value is not None:
+                    return {
+                        'normalized_metric': 'WASTE_GENERATED',
+                        'value': value,
+                        'unit': cls._detect_waste_unit(row_text),
+                        'entity_text': row_text[:100],
+                        'context': row_text[:200],
+                        'section_type': 'Environmental',
+                        'confidence': CONFIDENCE_TABLE_TOTAL,
+                        'validation_status': 'VALID',
+                        'validation_issues': [],
+                        'source_type': 'table_reconstructed',
+                        'page': row_info['page'],
+                    }
+        
+        # Fallback: aggregate all waste rows
+        total = 0.0
+        pages = []
+        contexts = []
+        seen_categories = set()
+        
+        for row_info in rows:
+            row_text = row_info['text']
+            if cls._is_rejected(row_text):
+                continue
+            
+            row_lower = row_text.lower()
+            matched = False
+            for pat in cls.WASTE_PATTERNS:
+                if pat.search(row_text):
+                    matched = True
+                    break
+            
+            if not matched:
+                continue
+            
+            # Avoid double-counting: check for category uniqueness
+            category_key = re.sub(r'[\d,.\s]+', '', row_lower)[:30]
+            if category_key in seen_categories:
+                continue
+            seen_categories.add(category_key)
+            
+            value = cls._extract_first_valid_number(row_text, min_value=0.1)
+            if value is not None and value > 0:
+                total += value
+                pages.append(row_info['page'])
+                contexts.append(row_text[:80])
+        
+        if total > 0:
+            return {
+                'normalized_metric': 'WASTE_GENERATED',
+                'value': round(total, 2),
+                'unit': 'MT',
+                'entity_text': f"Aggregated waste ({len(contexts)} categories)",
+                'context': "; ".join(contexts[:3])[:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': ['aggregated_from_categories'],
+                'source_type': 'table_reconstructed',
+                'page': pages[0] if pages else 0,
+            }
+        
+        return None
+    
+    @classmethod
+    def _extract_water(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract water: look for 'total water' first.
+        If not found, SUM all water source rows (groundwater, surface, third party).
+        """
+        # First try: total water row
+        for row_info in rows:
+            row_text = row_info['text']
+            if cls._is_rejected(row_text):
+                continue
+            if re.search(r'total\s+water', row_text, re.I):
+                value = cls._extract_first_valid_number(row_text, min_value=100)
+                if value is not None:
+                    return {
+                        'normalized_metric': 'WATER_USAGE',
+                        'value': value,
+                        'unit': cls._detect_water_unit(row_text),
+                        'entity_text': row_text[:100],
+                        'context': row_text[:200],
+                        'section_type': 'Environmental',
+                        'confidence': CONFIDENCE_TABLE_TOTAL,
+                        'validation_status': 'VALID',
+                        'validation_issues': [],
+                        'source_type': 'table_reconstructed',
+                        'page': row_info['page'],
+                    }
+        
+        # Fallback: aggregate water sources
+        total = 0.0
+        pages = []
+        contexts = []
+        seen_sources = set()
+        
+        for row_info in rows:
+            row_text = row_info['text']
+            if cls._is_rejected(row_text):
+                continue
+            
+            row_lower = row_text.lower()
+            is_water_source = any(
+                word in row_lower
+                for word in ['groundwater', 'ground water', 'surface water',
+                             'third party', 'municipal water', 'tanker water', 'rainwater']
+            )
+            
+            if not is_water_source:
+                continue
+            
+            # Avoid double-counting
+            source_key = re.sub(r'[\d,.\s]+', '', row_lower)[:30]
+            if source_key in seen_sources:
+                continue
+            seen_sources.add(source_key)
+            
+            value = cls._extract_first_valid_number(row_text, min_value=10)
+            if value is not None and value > 0:
+                total += value
+                pages.append(row_info['page'])
+                contexts.append(row_text[:80])
+        
+        if total > 0:
+            return {
+                'normalized_metric': 'WATER_USAGE',
+                'value': round(total, 2),
+                'unit': 'KL',
+                'entity_text': f"Aggregated water ({len(contexts)} sources)",
+                'context': "; ".join(contexts[:3])[:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': ['aggregated_from_sources'],
+                'source_type': 'table_reconstructed',
+                'page': pages[0] if pages else 0,
+            }
+        
+        return None
+    
+    # ------------------------------------------------------------------
+    # UNIT DETECTION HELPERS
+    # ------------------------------------------------------------------
+    
+    @staticmethod
+    def _detect_emission_unit(text: str) -> str:
+        """Detect emission unit from row text."""
+        text_lower = text.lower()
+        if 'mtco2' in text_lower or 'mt co2' in text_lower:
+            return 'MtCO2e'
+        if 'ktco2' in text_lower:
+            return 'ktCO2e'
+        if 'tco2' in text_lower or 'tonnes co2' in text_lower or 'metric tonnes' in text_lower:
+            return 'tCO2e'
+        if 'co2' in text_lower or 'carbon' in text_lower or 'ghg' in text_lower:
+            return 'tCO2e'
+        if 'tonnes' in text_lower or 'metric ton' in text_lower:
+            return 'tCO2e'
+        return 'tCO2e'  # default for emissions
+    
+    @staticmethod
+    def _detect_energy_unit(text: str) -> str:
+        """Detect energy unit from row text."""
+        text_lower = text.lower()
+        if 'gwh' in text_lower:
+            return 'GWh'
+        if 'mwh' in text_lower:
+            return 'MWh'
+        if 'kwh' in text_lower:
+            return 'kWh'
+        if 'tj' in text_lower:
+            return 'TJ'
+        if 'gj' in text_lower:
+            return 'GJ'
+        if 'mj' in text_lower:
+            return 'MJ'
+        if 'mn kwh' in text_lower or 'million kwh' in text_lower:
+            return 'Mn kWh'
+        return 'MJ'  # default for energy
+    
+    @staticmethod
+    def _detect_waste_unit(text: str) -> str:
+        """Detect waste unit from row text."""
+        text_lower = text.lower()
+        if 'kg' in text_lower:
+            return 'kg'
+        if 'mt' in text_lower or 'metric ton' in text_lower:
+            return 'MT'
+        if 'tonnes' in text_lower or 'tons' in text_lower:
+            return 'MT'
+        return 'MT'  # default for waste
+    
+    @staticmethod
+    def _detect_water_unit(text: str) -> str:
+        """Detect water unit from row text."""
+        text_lower = text.lower()
+        if 'kl' in text_lower or 'kilolitre' in text_lower or 'kiloliter' in text_lower:
+            return 'KL'
+        if 'm3' in text_lower or 'm³' in text_lower or 'cubic' in text_lower:
+            return 'KL'
+        if 'ml' in text_lower and 'million' in text_lower:
+            return 'ML'
+        return 'KL'  # default for water
+
+
+# ============================================================================
 # LAYER 1b: ENHANCED TABLE PARSER (pdfplumber tables)
 # ============================================================================
 
@@ -297,10 +853,13 @@ class EnhancedTableParser:
     """
     Enhanced table parser using pdfplumber's extract_tables() output.
     Handles multi-line headers, year detection, metric mapping, value validation.
-    ✅ FIX 34: Only total rows (or last row) are accepted.
-    ✅ FIX 35: Scale validation applied.
+    ✅ FIX 34: Only total rows (or last row) are accepted (Stage 1).
+    🔥 FIX 40: Also accept scope/energy/water/waste rows (Stage 2).
+    🔥 FIX 42: Partial table acceptance — extract first numeric if header unclear.
+    ✅ FIX 35: Scale validation applied (relaxed thresholds via FIX 43).
     ✅ FIX 36: Strict unit validation.
     ✅ FIX 39: Confidence set based on total row.
+    🔥 FIX 45: Debug logging for rejected rows.
     """
     
     # Comprehensive mapping for row labels → canonical metric (7 target metrics)
@@ -355,43 +914,72 @@ class EnhancedTableParser:
         re.compile(r'[\d.]+\s*/\s*(employee|unit|tonne|kwh)', re.I),
     ]
     
+    # 🔥 FIX 40: ESG row keywords — rows containing these are valid even without "total"
+    ESG_ROW_KEYWORDS = re.compile(
+        r'\b(scope\s*1|scope\s*2|scope\s*3|energy|water|waste)\b', re.IGNORECASE
+    )
+
     @classmethod
-    def parse_tables(cls, tables_data: List[Dict], page_texts: Optional[List[Dict]] = None) -> List[Dict]:
+    def parse_tables(cls, tables_data: List[Dict], page_texts: Optional[List[Dict]] = None,
+                     relaxed: bool = False) -> List[Dict]:
         """
         Parse all tables extracted from PDF.
+        🔥 FIX 46: Multi-stage — `relaxed=True` enables Stage 2 (non-total rows, lower thresholds).
         If no grid tables yield results, fall back to text-block parser.
         """
         all_metrics = []
         if tables_data:
             for table_info in tables_data:
-                metrics = cls._parse_single_table(table_info['table'], table_info['page'])
+                metrics = cls._parse_single_table(
+                    table_info['table'], table_info['page'], relaxed=relaxed
+                )
                 all_metrics.extend(metrics)
         
         # Fallback: if no metrics from grid tables and page texts provided, use legacy block parser
         if not all_metrics and page_texts:
             legacy_parser = TableParserLegacy()
             for page in page_texts:
-                rows = legacy_parser.parse_page(page['text'], page['page_number'])
+                rows = legacy_parser.parse_page(page['text'], page['page_number'], relaxed=relaxed)
                 all_metrics.extend(rows)
         
         return all_metrics
     
     @classmethod
-    def _parse_single_table(cls, table: List[List[str]], page_num: int) -> List[Dict]:
-        """Parse one extracted table (list of rows)"""
+    def _parse_single_table(cls, table: List[List[str]], page_num: int,
+                            relaxed: bool = False) -> List[Dict]:
+        """Parse one extracted table (list of rows)
+        🔥 FIX 42: If relaxed=True and header detection fails, still try partial extraction.
+        """
         if not table or len(table) < 2:
             return []
         
         # Step 1: Detect header rows (may be multiple)
         header_rows, data_start_idx = cls._detect_header_rows(table)
+        
+        # 🔥 FIX 42: PARTIAL TABLE ACCEPTANCE — if header unclear in relaxed mode,
+        # treat first row as header, start data from row 1
         if not header_rows:
-            return []
+            if relaxed:
+                print(f"    🔥 [FIX 42] Header unclear on page {page_num}, using partial extraction")
+                header_rows = [table[0]]
+                data_start_idx = 1
+            else:
+                return []
         
         # Step 2: Determine which column contains the latest year
         year_col_idx = cls._find_latest_year_column(header_rows)
         
+        # 🔥 FIX 42: If no year column found in relaxed mode, use first numeric column
+        if year_col_idx < 0 and relaxed:
+            year_col_idx = cls._find_first_numeric_column(table, data_start_idx)
+            if year_col_idx >= 0:
+                print(f"    🔥 [FIX 42] No year column found, using first numeric column {year_col_idx}")
+        
         # Step 3: Extract units (from header rows or from column data)
         col_units = cls._extract_column_units(header_rows, table, data_start_idx)
+        
+        # Choose threshold set based on stage
+        active_min_values = RELAXED_MIN_VALUES if relaxed else MIN_VALUES
         
         # Step 4: Process each data row
         results = []
@@ -406,24 +994,39 @@ class EnhancedTableParser:
             if not metric_label:
                 continue
             
-            # ✅ FIX 34: Total row detection
-            if not cls._is_total_row(metric_label, row_idx, num_rows):
+            # 🔥 FIX 40 + FIX 45: Row acceptance with debug logging
+            is_total = cls._is_total_row(metric_label, row_idx, num_rows)
+            is_esg_keyword_row = bool(cls.ESG_ROW_KEYWORDS.search(metric_label))
+            
+            if not is_total and not (relaxed and is_esg_keyword_row):
+                # 🔥 FIX 45: Debug logging — why this row was rejected
+                print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — "
+                      f"no total keyword, not ESG keyword row (relaxed={relaxed})")
                 continue
             
             # Map label to canonical metric
             canonical_metric = cls._map_metric(metric_label)
             if not canonical_metric:
+                # 🔥 FIX 45: Debug logging
+                print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — no metric mapping found")
                 continue
             
             # Get the value from the latest year column
-            if year_col_idx >= len(row):
-                continue
-            value_cell = row[year_col_idx].strip() if row[year_col_idx] else ''
+            # 🔥 FIX 42: If year_col_idx is still invalid, try first numeric in this row
+            effective_col = year_col_idx
+            if effective_col < 0 or effective_col >= len(row):
+                effective_col = cls._find_first_numeric_in_row(row)
+                if effective_col < 0:
+                    print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — no numeric column found")
+                    continue
+            
+            value_cell = row[effective_col].strip() if row[effective_col] else ''
             if not value_cell:
                 continue
             
             # Extract numeric value and unit from the cell
-            value, unit = cls._extract_value_and_unit(value_cell, col_units[year_col_idx])
+            fallback_unit = col_units[effective_col] if effective_col < len(col_units) else ''
+            value, unit = cls._extract_value_and_unit(value_cell, fallback_unit)
             if value is None:
                 continue
             
@@ -433,20 +1036,32 @@ class EnhancedTableParser:
             # ✅ FIX 36: Strict unit validation
             if canonical_metric in STRICT_UNIT_MAP and STRICT_UNIT_MAP[canonical_metric]:
                 if unit not in STRICT_UNIT_MAP[canonical_metric]:
+                    # 🔥 FIX 45: Debug logging
+                    print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — "
+                          f"invalid unit '{unit}' for {canonical_metric}")
                     continue
             
-            # ✅ FIX 35: Value scale validation
-            min_val = MIN_VALUES.get(canonical_metric, 0)
+            # ✅ FIX 35 + 🔥 FIX 43: Value scale validation (uses active thresholds)
+            min_val = active_min_values.get(canonical_metric, 0)
             if value < min_val:
+                # 🔥 FIX 45: Debug logging
+                print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — "
+                      f"value {value} below threshold {min_val}")
                 continue
             
             # Reject if context (row or header) indicates intensity/target
             context_str = ' '.join(row[:3]) + ' ' + ' '.join(header_rows[0][:3])
             if cls._is_rejected_context(context_str):
+                print(f"    🔍 [DEBUG] Row rejected: '{metric_label}' — intensity/target context")
                 continue
             
             # ✅ FIX 39: Confidence based on total row and table source
-            confidence = CONFIDENCE_TABLE_TOTAL if cls._is_total_row(metric_label, row_idx, num_rows) else CONFIDENCE_TABLE_ONLY
+            if is_total:
+                confidence = CONFIDENCE_TABLE_TOTAL
+            elif is_esg_keyword_row:
+                confidence = CONFIDENCE_TABLE_ONLY  # ESG keyword rows get table-only confidence
+            else:
+                confidence = CONFIDENCE_TABLE_ONLY
             
             # Build result
             results.append({
@@ -466,10 +1081,31 @@ class EnhancedTableParser:
         return results
     
     @classmethod
+    def _find_first_numeric_column(cls, table: List[List[str]], data_start: int) -> int:
+        """🔥 FIX 42: Find the first column that contains numeric data (skipping col 0 = label)."""
+        for row in table[data_start:data_start + 3]:  # sample first 3 data rows
+            for col_idx in range(1, len(row)):
+                cell = row[col_idx].strip() if row[col_idx] else ''
+                if re.search(r'\d', cell):
+                    return col_idx
+        return -1
+    
+    @classmethod
+    def _find_first_numeric_in_row(cls, row: List[str]) -> int:
+        """🔥 FIX 42: Find first column with a numeric value in this specific row (skipping col 0)."""
+        for col_idx in range(1, len(row)):
+            cell = row[col_idx].strip() if row[col_idx] else ''
+            if re.search(r'[\d,]+\.?\d*', cell) and not re.match(r'^(FY|fy|20\d{2}|19\d{2})$', cell.strip()):
+                return col_idx
+        return -1
+    
+    @classmethod
     def _is_total_row(cls, label: str, row_idx: int, total_rows: int) -> bool:
-        """✅ FIX 34: Return True if row contains total keyword or is last row."""
+        """✅ FIX 34: Return True if row contains total/gross/overall keyword or is last row.
+        Note: ESG keyword rows (scope/energy/water/waste) are handled separately via FIX 40.
+        """
         label_lower = label.lower()
-        if re.search(r'\b(total|grand total|overall)\b', label_lower):
+        if re.search(r'\b(total|grand total|overall|gross)\b', label_lower):
             return True
         # Last row of table (assuming summary row)
         if row_idx == total_rows - 1:
@@ -616,7 +1252,8 @@ class EnhancedTableParser:
 class TableParserLegacy:
     """Original text-block table parser (used as fallback) - also updated with total-row and scale validation"""
     
-    def parse_page(self, page_text: str, page_number: int) -> List[Dict]:
+    def parse_page(self, page_text: str, page_number: int, relaxed: bool = False) -> List[Dict]:
+        self._relaxed = relaxed
         results = []
         blocks = re.split(r'\n\s*\n', page_text)
         for block in blocks:
@@ -690,8 +1327,13 @@ class TableParserLegacy:
         if not metric_name:
             return None
         
-        # ✅ FIX 34: Total row detection
-        if not self._is_total_row(metric_label, row_idx, total_rows):
+        # ✅ FIX 34 + 🔥 FIX 40: Row acceptance (total or ESG keyword in relaxed mode)
+        is_total = self._is_total_row(metric_label, row_idx, total_rows)
+        is_esg_kw = bool(EnhancedTableParser.ESG_ROW_KEYWORDS.search(metric_label))
+        relaxed = getattr(self, '_relaxed', False)
+        if not is_total and not (relaxed and is_esg_kw):
+            print(f"    🔍 [DEBUG-LEGACY] Row rejected: '{metric_label}' — "
+                  f"no total keyword (relaxed={relaxed})")
             return None
         
         numeric_cols = []
@@ -734,9 +1376,12 @@ class TableParserLegacy:
             if unit not in STRICT_UNIT_MAP[metric_name]:
                 return None
         
-        # ✅ FIX 35: Scale validation
-        min_val = MIN_VALUES.get(metric_name, 0)
+        # ✅ FIX 35 + 🔥 FIX 43: Scale validation (uses relaxed thresholds if applicable)
+        active_mins = RELAXED_MIN_VALUES if getattr(self, '_relaxed', False) else MIN_VALUES
+        min_val = active_mins.get(metric_name, 0)
         if value < min_val:
+            print(f"    🔍 [DEBUG-LEGACY] Row rejected: '{metric_label}' — "
+                  f"value {value} below threshold {min_val}")
             return None
         
         # ✅ FIX 39: Confidence based on total row and table source
@@ -757,9 +1402,11 @@ class TableParserLegacy:
         }
     
     def _is_total_row(self, label: str, row_idx: int, total_rows: int) -> bool:
-        """✅ FIX 34: Return True if row contains total keyword or is last row."""
+        """✅ FIX 34: Return True if row contains total/gross/overall keyword or is last row.
+        Note: ESG keyword rows handled separately via FIX 40.
+        """
         label_lower = label.lower()
-        if re.search(r'\b(total|grand total|overall)\b', label_lower):
+        if re.search(r'\b(total|grand total|overall|gross)\b', label_lower):
             return True
         # Last row of table (assuming summary row)
         if row_idx == total_rows - 1:
@@ -1696,7 +2343,15 @@ class PDFEvaluationPipeline:
     """
     ✅ FIX 33: TABLE OVERRIDE — If metric exists in table, ignore paragraph values.
     ✅ FIX 34-39: All new rules integrated.
+    🔥 FIX 40-46: RECOVERY MODE with multi-stage extraction.
     """
+    
+    # 🔥 FIX 46: Target metrics — used to check completeness
+    ALL_TARGET_METRICS = {
+        'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
+        'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
+        'ESG_SCORE'
+    }
     
     def __init__(
         self,
@@ -1705,16 +2360,23 @@ class PDFEvaluationPipeline:
         classifier_path: str = './models/classifier/final'
     ):
         print("\n" + "="*70)
-        print("INITIALIZING ESG EXTRACTION PIPELINE v8.0 (TOTAL-ONLY ESG INTELLIGENCE)")
+        print("INITIALIZING ESG EXTRACTION PIPELINE v9.0 (RECOVERY MODE + MULTI-STAGE)")
         print("="*70)
-        print("\n🔒 APPLIED FIXES (v8.0):")
+        print("\n🔒 APPLIED FIXES (v9.0):")
         print("  ✅ FIX 33: TABLE OVERRIDE — If metric exists in table, ignore paragraph values")
-        print("  ✅ FIX 34: TOTAL ROW DETECTION — Only accept rows containing total/grand total/overall or last row")
-        print("  ✅ FIX 35: VALUE SCALE VALIDATION — Minimum thresholds (Scope1/2≥1000, Scope3≥10000, Water≥100k, Energy≥1e8 MJ)")
-        print("  ✅ FIX 36: STRICT UNIT VALIDATION — Waste→tonnes/kg, Emissions→tCO2e, Energy→MJ/kWh, Water→KL/m3")
-        print("  ✅ FIX 37: PARAGRAPH FILTER — Reject if contains intervention/saved/reduced/initiative")
-        print("  ✅ FIX 38: ESG SCORE HARD FILTER — Only if explicitly 'ESG score' or 'rating'")
-        print("  ✅ FIX 39: CONFIDENCE CORRECTION — Table+total=0.95, table only=0.75, paragraph max 0.6")
+        print("  ✅ FIX 34: TOTAL ROW DETECTION — Only accept total/grand total/overall or last row")
+        print("  ✅ FIX 35: VALUE SCALE VALIDATION — Minimum thresholds (RELAXED)")
+        print("  ✅ FIX 36: STRICT UNIT VALIDATION — Metric-unit compatibility")
+        print("  ✅ FIX 37: PARAGRAPH FILTER — Reject intervention/saved/reduced/initiative")
+        print("  ✅ FIX 38: ESG SCORE HARD FILTER — Only explicit ESG score/rating")
+        print("  ✅ FIX 39: CONFIDENCE CORRECTION — Source-based confidence caps")
+        print("  🔥 FIX 40: TABLE PARSER RELAXATION — Accept scope/energy/water/waste rows")
+        print("  🔥 FIX 41: FALLBACK IF TABLE FAILS — Re-enable paragraph if table=0")
+        print("  🔥 FIX 42: PARTIAL TABLE ACCEPTANCE — First numeric if header unclear")
+        print("  🔥 FIX 43: RELAXED VALUE THRESHOLDS — Lower minimums")
+        print("  🔥 FIX 44: DISABLE TABLE OVERRIDE WHEN EMPTY — Don't block text")
+        print("  🔥 FIX 45: DEBUG LOGGING — Print rejection reasons")
+        print("  🔥 FIX 46: MULTI-STAGE EXTRACTION — Progressive relaxation")
         print()
 
         self.pdf_extractor    = PDFExtractor()
@@ -1728,17 +2390,25 @@ class PDFEvaluationPipeline:
         self.confidence_scorer = ConfidenceScorer()
         self.deduplicator     = MetricDeduplicator()
 
-        print("✓ Pipeline v8.0 (TOTAL-ONLY) initialized successfully\n")
+        print("✓ Pipeline v9.0 (RECOVERY MODE) initialized successfully\n")
 
     def process_pdf(self, pdf_path: str, output_path: Optional[str] = None) -> Dict:
-        """Process a PDF and extract ESG metrics — tables first (total rows only), text fallback with strict filters."""
+        """Process a PDF and extract ESG metrics using multi-stage extraction.
+        
+        🔥 FIX 46: MULTI-STAGE EXTRACTION STRATEGY:
+          Stage 1: Strict table extraction (total rows only, strict thresholds)
+          Stage 2: Relaxed table extraction (ESG keyword rows, lower thresholds)
+          Stage 3: Smart text fallback (paragraph extraction)
+        
+        After each stage, check metric completeness. Continue if missing metrics.
+        """
         print("\n" + "="*70)
         print(f"PROCESSING: {pdf_path}")
         print("="*70)
 
         results = {
             'file':             str(pdf_path),
-            'pipeline_version': 'v8.0_total_only',
+            'pipeline_version': 'v9.0_recovery_mode',
             'metrics':          [],
             'discarded':        [],
             'statistics':       {},
@@ -1750,19 +2420,81 @@ class PDFEvaluationPipeline:
         print("\n[Layer 1] Extracting text and tables from PDF...")
         pdf_data = self.pdf_extractor.extract_text_and_tables(pdf_path)
 
-        # Layer 1b: Enhanced table parser (primary)
-        print("[Layer 1b] Running enhanced table parser (total-row only)...")
-        table_metrics = EnhancedTableParser.parse_tables(
-            pdf_data.get('tables', []),
-            page_texts=pdf_data.get('pages', [])  # for fallback
-        )
-        print(f"  → {len(table_metrics)} table row(s) extracted")
-
+        # ======================================================================
+        # 🔥 STAGE 0: TABLE RECONSTRUCTION (PRIMARY — structured extraction)
+        # ======================================================================
+        print("\n" + "-"*50)
+        print("[STAGE 0] Table reconstruction + structured extraction...")
+        print("-"*50)
+        reconstructed_metrics = TableReconstructor.extract_from_pdf(pdf_data)
+        print(f"  → Stage 0: {len(reconstructed_metrics)} metric(s) extracted via reconstruction")
+        
+        found_metrics_s0 = {m['normalized_metric'] for m in reconstructed_metrics}
+        missing_after_s0 = self.ALL_TARGET_METRICS - found_metrics_s0
+        
+        if len(found_metrics_s0) >= 4:
+            print(f"  ✅ Stage 0 sufficient (≥4 metrics). Skipping legacy table parsers.")
+            table_metrics = reconstructed_metrics
+        else:
+            print(f"\n  ⚠ Stage 0 found {len(found_metrics_s0)} metrics. "
+                  f"Missing: {missing_after_s0}")
+            
+            # ==================================================================
+            # 🔥 STAGE 1: STRICT TABLE EXTRACTION (total rows only)
+            # ==================================================================
+            print("\n" + "-"*50)
+            print("[STAGE 1] Strict table extraction (total rows only)...")
+            print("-"*50)
+            table_metrics_stage1 = EnhancedTableParser.parse_tables(
+                pdf_data.get('tables', []),
+                page_texts=pdf_data.get('pages', []),
+                relaxed=False
+            )
+            print(f"  → Stage 1: {len(table_metrics_stage1)} metric(s) extracted")
+            
+            # Merge: Stage 0 takes priority, Stage 1 fills gaps
+            combined_s0_s1 = list(reconstructed_metrics)
+            s0_names = {m['normalized_metric'] for m in reconstructed_metrics}
+            for m in table_metrics_stage1:
+                if m['normalized_metric'] not in s0_names:
+                    combined_s0_s1.append(m)
+            
+            found_after_s1 = {m['normalized_metric'] for m in combined_s0_s1}
+            
+            if len(found_after_s1) >= 4:
+                print(f"  ✅ Stage 0+1 sufficient (≥4 metrics). Skipping Stage 2.")
+                table_metrics = combined_s0_s1
+            else:
+                # ==============================================================
+                # 🔥 STAGE 2: RELAXED TABLE EXTRACTION
+                # ==============================================================
+                missing_after_s1 = self.ALL_TARGET_METRICS - found_after_s1
+                print(f"\n  ⚠ Stage 0+1 found {len(found_after_s1)} metrics. "
+                      f"Missing: {missing_after_s1}")
+                print("\n" + "-"*50)
+                print("[STAGE 2] Relaxed table extraction (ESG keyword rows, lower thresholds)...")
+                print("-"*50)
+                table_metrics_stage2 = EnhancedTableParser.parse_tables(
+                    pdf_data.get('tables', []),
+                    page_texts=pdf_data.get('pages', []),
+                    relaxed=True
+                )
+                print(f"  → Stage 2: {len(table_metrics_stage2)} metric(s) extracted")
+                
+                # Merge: Stage 0+1 take priority, Stage 2 fills remaining gaps
+                table_metrics = list(combined_s0_s1)
+                s0_s1_names = {m['normalized_metric'] for m in combined_s0_s1}
+                for m in table_metrics_stage2:
+                    if m['normalized_metric'] not in s0_s1_names:
+                        table_metrics.append(m)
+                
+                print(f"  → Combined table metrics (S0+S1+S2): {len(table_metrics)}")
+        
         # Track which metrics were found in tables (for table override)
         table_metric_names: Set[str] = {m['normalized_metric'] for m in table_metrics}
 
-        # Layer 2-3: Preprocess and chunk text (fallback)
-        print("[Layer 2-3] Preprocessing and chunking text...")
+        # Layer 2-3: Preprocess and chunk text
+        print("\n[Layer 2-3] Preprocessing and chunking text...")
         clean_text = self.preprocessor.clean_text(pdf_data['full_text'])
         chunks = self.preprocessor.chunk_text(clean_text)
         print(f"  → Created {len(chunks)} text chunks")
@@ -1779,41 +2511,81 @@ class PDFEvaluationPipeline:
         esg_pct = len(esg_chunks) / len(chunks) * 100 if chunks else 0
         print(f"  → {len(esg_chunks)}/{len(chunks)} ESG chunks ({esg_pct:.1f}%)")
 
-        # Layer 5-11: NER text path (secondary, only for metrics not in tables)
+        # ======================================================================
+        # 🔥 FIX 41 + FIX 44: Determine if text extraction (Stage 3) is needed
+        # Stage 3 activates ONLY if combined table metrics < 3
+        # If table_metrics is empty → ALWAYS enable (FIX 41)
+        # If table_metrics has some but <3 → enable for missing metrics
+        # If table_metrics ≥ 3 → enable but only for metrics NOT in table
+        # ======================================================================
+        table_override_active = len(table_metrics) > 0
+        
+        # Deduplicate table metrics to count unique
+        table_unique_metrics = {m['normalized_metric'] for m in table_metrics}
+        need_stage3 = len(table_unique_metrics) < 3
+        
+        if len(table_metrics) == 0:
+            print("\n  🔥 [FIX 41/44] No table metrics found — ENABLING full paragraph extraction")
+            table_override_active = False
+            need_stage3 = True
+        elif need_stage3:
+            print(f"\n  🔥 [STAGE 3 TRIGGER] Only {len(table_unique_metrics)} unique table metrics (<3) — "
+                  f"enabling text fallback for missing metrics")
+        else:
+            print(f"  Table override active for: {table_metric_names}")
+            # Still run Stage 3 to fill any missing metrics from the 7 target set
+            missing_after_table = self.ALL_TARGET_METRICS - table_unique_metrics
+            if missing_after_table:
+                need_stage3 = True
+                print(f"  Still missing {len(missing_after_table)} target metrics: {missing_after_table}")
+                print(f"  → Stage 3 enabled for missing metrics only")
+
+        # ======================================================================
+        # 🔴 STAGE 3: SMART TEXT FALLBACK (LAST RESORT)
+        # ======================================================================
         text_metrics: List[Dict] = []
         all_discarded: List[Dict] = []
 
-        for chunk_idx, chunk in enumerate(esg_chunks):
-            # ✅ FIX 37: Paragraph filter before NER
-            if PARAGRAPH_REJECT_KEYWORDS.search(chunk['text']):
-                all_discarded.append({
-                    'entity_text': chunk['text'][:100],
-                    'reason': 'paragraph_reject_keyword',
-                    'chunk_idx': chunk_idx,
-                })
-                results['discard_reasons']['paragraph_reject_keyword'] += 1
-                continue
+        if need_stage3:
+            print("\n" + "-"*50)
+            print("[STAGE 3] Smart text fallback (paragraph extraction)...")
+            print("-"*50)
 
-            entities = self.ner_extractor.extract_entities(
-                chunk['text'], chunk['section_type']
-            )
-            if not entities:
-                continue
-
-            for entity in entities:
-                metric_result, discard_reason = self._process_entity(entity, chunk)
-
-                if discard_reason:
-                    results['discard_reasons'][discard_reason] += 1
+            for chunk_idx, chunk in enumerate(esg_chunks):
+                # ✅ FIX 37: Paragraph filter before NER
+                if PARAGRAPH_REJECT_KEYWORDS.search(chunk['text']):
                     all_discarded.append({
-                        'entity_text': entity['text'],
-                        'reason':      discard_reason,
-                        'chunk_idx':   chunk_idx,
+                        'entity_text': chunk['text'][:100],
+                        'reason': 'paragraph_reject_keyword',
+                        'chunk_idx': chunk_idx,
                     })
-                elif metric_result:
-                    # ✅ FIX 33: TABLE OVERRIDE — ignore paragraph values if metric already found in table
-                    if metric_result['normalized_metric'] not in table_metric_names:
+                    results['discard_reasons']['paragraph_reject_keyword'] += 1
+                    continue
+
+                entities = self.ner_extractor.extract_entities(
+                    chunk['text'], chunk['section_type']
+                )
+                if not entities:
+                    continue
+
+                for entity in entities:
+                    metric_result, discard_reason = self._process_entity(entity, chunk)
+
+                    if discard_reason:
+                        results['discard_reasons'][discard_reason] += 1
+                        all_discarded.append({
+                            'entity_text': entity['text'],
+                            'reason':      discard_reason,
+                            'chunk_idx':   chunk_idx,
+                        })
+                    elif metric_result:
+                        # ✅ FIX 33 + 🔥 FIX 44: TABLE OVERRIDE
+                        # Only block text metrics if table_override is active AND metric found in table
+                        if table_override_active and metric_result['normalized_metric'] in table_metric_names:
+                            continue
                         text_metrics.append(metric_result)
+        else:
+            print("\n  ✅ Sufficient table metrics (≥3). Stage 3 text fallback skipped.")
 
         print(f"\n[Pre-dedup] Table: {len(table_metrics)}, Text: {len(text_metrics)}, "
               f"Discarded: {len(all_discarded)}")
@@ -1840,6 +2612,15 @@ class PDFEvaluationPipeline:
         if discarded_low_conf > 0:
             print(f"\n[Conf gate] Discarded {discarded_low_conf} metrics with confidence < 0.5")
 
+        # 🔥 FIX 46: Report metric completeness
+        final_metric_names = {m['normalized_metric'] for m in results['metrics']}
+        still_missing = self.ALL_TARGET_METRICS - final_metric_names
+        print(f"\n[Completeness] Found: {len(final_metric_names)}/7 target metrics")
+        if still_missing:
+            print(f"  ⚠ Still missing: {still_missing}")
+        else:
+            print(f"  ✅ All target metrics recovered!")
+
         print(f"[Final] {len(results['metrics'])} unique metrics")
 
         # Statistics
@@ -1855,6 +2636,7 @@ class PDFEvaluationPipeline:
             'discarded_low_confidence': discarded_low_conf,
             'final_metrics':            len(results['metrics']),
             'valid_metrics':            len(valid_metrics),
+            'missing_metrics':          list(still_missing),
             'avg_confidence':  round(float(np.mean(confidences)), 4) if confidences else 0,
             'min_confidence':  round(float(np.min(confidences)), 4) if confidences else 0,
             'max_confidence':  round(float(np.max(confidences)), 4) if confidences else 0,
@@ -1940,7 +2722,7 @@ class PDFEvaluationPipeline:
         value_data['unit']  = canonical_unit
         value_data['value'] = canonical_value
 
-        # ✅ FIX 35: Value scale validation (reject small values)
+        # ✅ FIX 35 + 🔥 FIX 43: Value scale validation (uses relaxed thresholds)
         min_val = MIN_VALUES.get(normalized_metric, 0)
         if canonical_value < min_val:
             return None, f"value_below_min_{min_val}"
@@ -2029,7 +2811,7 @@ class PDFEvaluationPipeline:
     def _print_summary(self, results: Dict):
         """Print summary of extraction results"""
         print("\n" + "="*70)
-        print("EXTRACTION SUMMARY (v8.0 TOTAL-ONLY ESG INTELLIGENCE)")
+        print("EXTRACTION SUMMARY (v9.0 RECOVERY MODE + MULTI-STAGE)")
         print("="*70)
         
         stats = results['statistics']
@@ -2089,9 +2871,9 @@ class PDFEvaluationPipeline:
 # ============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description='ESG PDF Extraction v8.0 (Total-Only)')
+    parser = argparse.ArgumentParser(description='ESG PDF Extraction v9.0 (Recovery Mode + Multi-Stage)')
     parser.add_argument('--pdf_path', type=str, required=True, help='Path to PDF file')
-    parser.add_argument('--output_path', type=str, default='results_v8.0_total_only.json',
+    parser.add_argument('--output_path', type=str, default='results_v9.0_recovery.json',
                        help='Output JSON path')
     parser.add_argument('--ner_model', type=str, default='./models/ner_model/final',
                        help='NER model path')

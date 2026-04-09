@@ -1,0 +1,1306 @@
+{
+  "file": "accenture-360-value-report-2025.pdf",
+  "pipeline_version": "v9.0_recovery_mode",
+  "metrics": [
+    {
+      "normalized_metric": "WATER_USAGE",
+      "value": 75585.0,
+      "unit": "KL",
+      "entity_text": "Employee Commuting 75,585 74,783 42,653 Total Water Consumption 1,524,942 1,495,728 1,442,861",
+      "context": "Employee Commuting 75,585 74,783 42,653 Total Water Consumption 1,524,942 1,495,728 1,442,861",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "SCOPE_1",
+      "value": 19327.0,
+      "unit": "tCO2e",
+      "entity_text": "Scope 1 19,327 22,395 22,038",
+      "context": "Scope 1 19,327 22,395 22,038",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "SCOPE_3",
+      "value": 360828.0,
+      "unit": "tCO2e",
+      "entity_text": "Scope 3 Carbon Emissions By Source Office Energy 360,828 345,860 360,973",
+      "context": "Scope 3 Carbon Emissions By Source Office Energy 360,828 345,860 360,973",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "WASTE_GENERATED",
+      "value": 300.0,
+      "unit": "MT",
+      "entity_text": "Aggregated waste (3 categories)",
+      "context": "100% of our electronic waste (e-waste)\u2014such as; \u2022 We reused or recycled 100% of our e-waste relating; \u2022 We reused or recycled 100% of our furniture waste dioxide removal solution may",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [
+        "aggregated_from_categories"
+      ],
+      "source_type": "table_reconstructed",
+      "page": 35
+    }
+  ],
+  "discarded": [
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "Supply chain",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "carbon removal",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "water risk",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "waste and",
+      "reason": "validation_discard: Missing unit for metric 'WASTE_GENERATED'; Weak keyword match for metric 'WASTE_GENERATED'",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "office furniture",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "supplier",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "economically",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 3
+    },
+    {
+      "entity_text": "employ",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 3
+    },
+    {
+      "entity_text": "AI Awards",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Accessibility Centers",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "business",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "other",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 6
+    },
+    {
+      "entity_text": "career",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 7
+    },
+    {
+      "entity_text": "career",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 7
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 8
+    },
+    {
+      "entity_text": "cross-cultural differences",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 9
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "mental health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "Workplace health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "Workplace",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 13
+    },
+    {
+      "entity_text": "Accessibility Centers",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 13
+    },
+    {
+      "entity_text": "Accommodation Support Tool",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "other mobility aids. We support building on our global governance model. Our Global countries\u2014for requesting assistive technology, different needs by providing braille signage, sound Protection",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "Environment Ethics",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Human rights",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Supply chain",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Community impact",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "siness with a strong commitment to the We achieved our 90% Our new Learning to Earning initiative en",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 16
+    },
+    {
+      "entity_text": "Sustainable",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Water risk",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "drought",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "flooding, drought and water 90% of our key suppliers disclose We have set goals in alignment with th",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "bon reduction",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "near",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "-",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "term emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Zero waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_500",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "completion rates",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "completion rates",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "electronic waste \u2022 In fiscal 2025, we achieved our 2025 carbon removal goal through the use of credits from our naturerelating to computers, servers and based carbon removal projects, which were applied to remaining emissions",
+      "reason": "value_below_min_500",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "power supply",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "Scope 1, 2 and 3 emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "single use plastics",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Scope",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "absolute",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Scope 1 3 GHG emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Scope 1 and 2 GHG",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "purchasing and 2 GHG emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "ing and 2 GHG emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "revenue emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "plastic-free",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "Scope 1 and 2 emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "water risk",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "zero waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "energy-efficient practices where possible. Our Carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "climate-smart",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "greenhouse gas (GHG) emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 27
+    },
+    {
+      "entity_text": "business Carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 27
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "Renewable electricity",
+      "reason": "value_below_min_500",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_500",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "ch",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "internal carbon price",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "on",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "climate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "power",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "renewable sources",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "electricity. measuring the carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "energy efficiency",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "rail travel",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "air,",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "hotel and",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "ground transport suppliers are a key resource in reducing the carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "lower-carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "cloud",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "Scope 3 emissions. sustainability-focused approach to the way we operate, assessing and reporting the carbon",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "Procurement",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 34
+    },
+    {
+      "entity_text": "technology emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 34
+    },
+    {
+      "entity_text": "role-based",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 34
+    },
+    {
+      "entity_text": "Scope 3 emi",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 35
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Value",
+      "reason": "value_below_min_500",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Nature-based carbon removal In fiscal 2025 we applied carbon",
+      "reason": "value_below_min_500",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "nature-based carbon removal We continue to evaluate how best to achieve our SBTiprojects to remove carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "nature-based carbon removal projects are evolve our strategy as needed between carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "environmental impact",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "green jobs. They are expected to physically remove our clients. millions of metric tons of carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "water risk",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "water-intensive",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "water",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "Sustainable Development",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "zero waste: Supporting a low-carbon",
+      "reason": "value_below_min_500",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "low-carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "Shell Aviation, Accenture and American Express Global Business Travel",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "Energy Web e",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "waste, furniture and To unlock shared value for business and society, we are Foundation, collaborated to launch Avelia, a blockchainsingle-use plastics supporting the development of solutions that aim to help powered book-and-claim solution for aviation. Avelia uses create a low-carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "aviation fueling",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "waste and",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "office furniture Examples include: allocation of associated environmental",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "Direct air capture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "electronic waste (e-waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "electronic waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "e-waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "global",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "aviation fuel",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "computers and servers\u2014as well as all our office furniture",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "carbon dioxide removal",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "direct air capture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "e-waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "power operations",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "innovative",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "technology-based carbon",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "waste dioxide removal solution may be used to help advance relating to chairs, desks/workstations, sofas and our environmental commitments. tables, working with vendors to help us extend the life cycle of our furniture, including through Sustainable aviation fuel",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "business",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "business resilience",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 45
+    },
+    {
+      "entity_text": "Scope 2 Procurement",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 45
+    },
+    {
+      "entity_text": "ope 2",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "electricity usage",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "onmental impact is based carbon removal",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 47
+    },
+    {
+      "entity_text": "Environment Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 48
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 50
+    },
+    {
+      "entity_text": "higher",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "other compliance",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "Global",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 52
+    },
+    {
+      "entity_text": "Client",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 54
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 54
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 54
+    },
+    {
+      "entity_text": "enterprise risk",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 54
+    },
+    {
+      "entity_text": "Value Report 2025 Data privacy and information security",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 55
+    },
+    {
+      "entity_text": "Enterprise",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 55
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 56
+    },
+    {
+      "entity_text": "Responsible AI deployment",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 56
+    },
+    {
+      "entity_text": "shareholder",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 56
+    },
+    {
+      "entity_text": "business resilience",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 58
+    },
+    {
+      "entity_text": "human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 58
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 60
+    },
+    {
+      "entity_text": "human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 61
+    },
+    {
+      "entity_text": "supplier impact",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 61
+    },
+    {
+      "entity_text": "direct",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 62
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 62
+    },
+    {
+      "entity_text": "Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 62
+    },
+    {
+      "entity_text": "Environmental sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 62
+    },
+    {
+      "entity_text": "social",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "greenhouse gas emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "key emission",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "practical",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "energy sector",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "renewable solutions. We provide Accenture In fiscal 2025, ADP led more than 400 engagements in expert guidance to help organizations transition to nearly 30 countries across seven impact areas: more sustainable systems, reduce carbon emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Agriculture energy",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "industrial water filtration",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "Action solar",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "real-world climate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 68
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 68
+    },
+    {
+      "entity_text": "s carbon emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 69
+    },
+    {
+      "entity_text": "naire. our 2008-2009 Corporate Citizenship Report. contributed to the development of the ISSB Standa",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Client",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Value Report 2025 Our sustainability priorities We combined our insights and business and stakeholder engagement to determine our sustainability priorities for fiscal 2025. Supporting our Carbon Emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "other value chain",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope1",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 2",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "absolute",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1 and 2 emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1 & 2 Emission",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1 & 2 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 3 emissions per unit of (61) % (55)% 0.000026 revenue from fiscal 2019 base year Carbon Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Carbon Removal",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Net Residual Emissions",
+      "reason": "invalid_unit_MWh_for_SCOPE_1",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Office Energy",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Source1 Megawatt hours (MWh) Carbon Emissions",
+      "reason": "invalid_unit_MWh_for_SCOPE_1",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1 & 2 Carbon Emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Renewable Electricity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Non",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "-",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Other",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Diesel",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Scope 1 & 2 Carbon Emissions",
+      "reason": "validation_discard: Missing unit for metric 'SCOPE_2'",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Office Energy",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Purchased Goods & Services",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Electricity from Renewable Sources",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Capital Goods",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Office",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Capital Goods",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Office Electricity Efficiency",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Fuel",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Energy-Related Activities",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Business Travel",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Total Water Consumption",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Scope 3 Carbon Emissions",
+      "reason": "invalid_unit_%_for_SCOPE_3",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Water Consumption",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Baseline",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Water Stressed Regions Carbon Emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Stressed Regions Carbon Emissions 711,431 654,819 542,195 Carbon Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "Region2",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "Water Consumption",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "renewable electricity contracts. EMEA 196,334 186,455 168,414 Accenture's carbon emissions",
+      "reason": "validation_discard: Missing unit for metric 'SCOPE_2'",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "Asia Pacific market. Prior period amounts have been reclassified to conform with the Carbon Emissions 711,431 654,819 542,195 current period presentation. 3. Carbon removal credits applied in fiscal 2025 have been retired from a Verified Carbon Standard (VCS) and Climate, Communities and Biodiversity (CCB) Carbon Emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 77
+    },
+    {
+      "entity_text": "Value",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    }
+  ],
+  "statistics": {
+    "total_chunks": 378,
+    "esg_chunks": 80,
+    "esg_chunk_percentage": 21.16,
+    "table_extractions": 4,
+    "text_extractions": 5,
+    "discarded_extractions": 235,
+    "discarded_low_confidence": 1,
+    "final_metrics": 4,
+    "valid_metrics": 4,
+    "missing_metrics": [
+      "ESG_SCORE",
+      "SCOPE_2",
+      "ENERGY_CONSUMPTION"
+    ],
+    "avg_confidence": 0.75,
+    "min_confidence": 0.7,
+    "max_confidence": 0.9
+  },
+  "warnings": [],
+  "discard_reasons": {
+    "esg_score_not_explicit": 144,
+    "value_below_min_50000": 2,
+    "validation_discard: Missing unit for metric 'WASTE_GENERATED'; Weak keyword match for metric 'WASTE_GENERATED'": 1,
+    "unknown_metric_classification": 29,
+    "paragraph_reject_keyword": 3,
+    "no_valid_value_after_hard_filtering": 26,
+    "value_below_min_500": 16,
+    "value_below_min_1000000": 5,
+    "value_below_min_5000": 2,
+    "invalid_unit_MWh_for_SCOPE_1": 2,
+    "validation_discard: Missing unit for metric 'SCOPE_2'": 2,
+    "invalid_unit_%_for_WATER_USAGE": 2,
+    "invalid_unit_%_for_SCOPE_3": 1
+  },
+  "master_prompt_output": {
+    "WATER_USAGE": {
+      "value": 75585.0,
+      "unit": "KL",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "SCOPE_1": {
+      "value": 19327.0,
+      "unit": "tCO2e",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "SCOPE_3": {
+      "value": 360828.0,
+      "unit": "tCO2e",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "WASTE_GENERATED": {
+      "value": 300.0,
+      "unit": "MT",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 35
+    }
+  }
+}

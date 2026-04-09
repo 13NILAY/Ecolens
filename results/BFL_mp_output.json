@@ -1,0 +1,50 @@
+{
+  "SCOPE_1": {
+    "value": 82745.0,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 62
+  },
+  "SCOPE_2": {
+    "value": 167163.0,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 62
+  },
+  "SCOPE_3": {
+    "value": 564161.0,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 62
+  },
+  "ENERGY_CONSUMPTION": {
+    "value": 552233.0,
+    "unit": "MJ",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 55
+  },
+  "WATER_USAGE": {
+    "value": 1128679.0,
+    "unit": "KL",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 69
+  },
+  "WASTE_GENERATED": {
+    "value": 992.89,
+    "unit": "MT",
+    "confidence": 0.7,
+    "confidence_band": "good (0.7-0.8)",
+    "source": "table_reconstructed",
+    "page": 7
+  }
+}
