@@ -67,6 +67,14 @@ TARGET_METRICS: Set[str] = {
     'WATER_USAGE'
 }
 
+# 🆕 FIX 48: EXTENDED TARGET METRICS — 4 new metrics (additive)
+TARGET_METRICS.update({
+    'ENVIRONMENTAL_SCORE',
+    'SOCIAL_SCORE',
+    'GOVERNANCE_SCORE',
+    'CARBON_EMISSIONS',
+})
+
 # Unit Whitelist — ✅ FIX 12: Expanded with comprehensive ESG unit patterns
 VALID_UNITS: Set[str] = {
     # Emissions
@@ -123,6 +131,14 @@ STRICT_UNIT_MAP: Dict[str, Set[str]] = {
     'ESG_SCORE': set(),  # unitless
 }
 
+# 🆕 FIX 48: Extended unit map for new metrics (additive)
+STRICT_UNIT_MAP.update({
+    'ENVIRONMENTAL_SCORE': set(),  # unitless
+    'SOCIAL_SCORE': set(),         # unitless
+    'GOVERNANCE_SCORE': set(),     # unitless
+    'CARBON_EMISSIONS': {'tCO2e', 'Mt CO2e', 'MtCO2e', 'ktCO2e', 'tCO2', 'tonnes CO2', 'tonnes', 't', 'MT'},
+})
+
 # Metric-specific keywords
 METRIC_KEYWORDS: Dict[str, List[str]] = {
     'SCOPE_1': ['emissions', 'co2', 'ghg', 'carbon', 'scope 1', 'scope1', 'direct emissions'],
@@ -134,7 +150,18 @@ METRIC_KEYWORDS: Dict[str, List[str]] = {
     'ESG_SCORE': ['esg', 'score', 'rating', 'sustainability', 'index'],
 }
 
+# 🆕 FIX 48: Extended keywords for new metrics (additive)
+METRIC_KEYWORDS.update({
+    'ENVIRONMENTAL_SCORE': ['environmental score', 'environment score', 'e score', 'environmental rating', 'environmental pillar'],
+    'SOCIAL_SCORE': ['social score', 's score', 'social rating', 'social pillar'],
+    'GOVERNANCE_SCORE': ['governance score', 'g score', 'governance rating', 'governance pillar'],
+    'CARBON_EMISSIONS': ['total emissions', 'total carbon', 'total ghg', 'overall emissions', 'carbon emissions', 'co2 emissions'],
+})
+
 UNITLESS_ALLOWED_METRICS: Set[str] = {'ESG_SCORE'}
+
+# 🆕 FIX 48: Score metrics are also unitless (additive)
+UNITLESS_ALLOWED_METRICS.update({'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE'})
 
 TEMPORAL_KEYWORDS: List[str] = [
     'compared', 'previous', 'last year', 'prior year', 'preceding',
@@ -243,6 +270,14 @@ MIN_VALUES = {
     'ESG_SCORE': 0,       # no minimum
 }
 
+# 🆕 FIX 48: Thresholds for new metrics (additive)
+MIN_VALUES.update({
+    'ENVIRONMENTAL_SCORE': 0,
+    'SOCIAL_SCORE': 0,
+    'GOVERNANCE_SCORE': 0,
+    'CARBON_EMISSIONS': 500,
+})
+
 # 🔥 FIX 43: Stage 2 relaxed thresholds
 RELAXED_MIN_VALUES = {
     'SCOPE_1': 100,
@@ -253,6 +288,14 @@ RELAXED_MIN_VALUES = {
     'WASTE_GENERATED': 100,
     'ESG_SCORE': 0,
 }
+
+# 🆕 FIX 48: Relaxed thresholds for new metrics (additive)
+RELAXED_MIN_VALUES.update({
+    'ENVIRONMENTAL_SCORE': 0,
+    'SOCIAL_SCORE': 0,
+    'GOVERNANCE_SCORE': 0,
+    'CARBON_EMISSIONS': 100,
+})
 
 # ✅ FIX 39: Confidence base values (aligned to spec)
 CONFIDENCE_TABLE_TOTAL = 0.90     # table + strong context (total row)
@@ -862,7 +905,7 @@ class EnhancedTableParser:
     🔥 FIX 45: Debug logging for rejected rows.
     """
     
-    # Comprehensive mapping for row labels → canonical metric (7 target metrics)
+    # Comprehensive mapping for row labels → canonical metric (7+4 target metrics)
     METRIC_SYNONYMS = {
         'SCOPE_1': [
             'scope 1', 'scope1', 'direct emissions', 'scope i', 'scope one',
@@ -891,7 +934,27 @@ class EnhancedTableParser:
         'ESG_SCORE': [
             'esg score', 'esg rating', 'sustainability score', 'sustainability rating',
             'esg index', 'moody\'s score', 's&p global score', 'esg risk rating'
-        ]
+        ],
+        # 🆕 FIX 48: New metric synonyms (additive)
+        'ENVIRONMENTAL_SCORE': [
+            'environmental score', 'environment score', 'e score',
+            'environmental pillar score', 'environmental rating',
+            'environmental performance score'
+        ],
+        'SOCIAL_SCORE': [
+            'social score', 's score', 'social pillar score',
+            'social rating', 'social performance score'
+        ],
+        'GOVERNANCE_SCORE': [
+            'governance score', 'g score', 'governance pillar score',
+            'governance rating', 'governance performance score',
+            'corporate governance score'
+        ],
+        'CARBON_EMISSIONS': [
+            'total emissions', 'total carbon emissions', 'total ghg emissions',
+            'overall emissions', 'total co2 emissions', 'aggregate emissions',
+            'combined scope emissions', 'total greenhouse gas emissions'
+        ],
     }
     
     # Patterns for years
@@ -1702,7 +1765,7 @@ class MetricClassifier:
         if confidence < 0.7:
             return "UNKNOWN", confidence
         
-        # ✅ FIX 7: METRIC ENFORCEMENT
+        # ✅ FIX 7 + 🆕 FIX 48: METRIC ENFORCEMENT (extended with new metrics)
         if normalized_metric not in TARGET_METRICS:
             return "UNKNOWN", 0.0
         
@@ -2117,6 +2180,11 @@ class MetricValidator:
             'WATER_USAGE': (0, 100_000_000),
             'WASTE_GENERATED': (0, 10_000_000),
             'ESG_SCORE': (0, 100),
+            # 🆕 FIX 48: Validation ranges for new metrics (additive)
+            'ENVIRONMENTAL_SCORE': (0, 100),
+            'SOCIAL_SCORE': (0, 100),
+            'GOVERNANCE_SCORE': (0, 100),
+            'CARBON_EMISSIONS': (0, 50_000_000),
         }
     
     def validate(
@@ -2346,11 +2414,14 @@ class PDFEvaluationPipeline:
     🔥 FIX 40-46: RECOVERY MODE with multi-stage extraction.
     """
     
-    # 🔥 FIX 46: Target metrics — used to check completeness
+    # 🔥 FIX 46 + 🆕 FIX 48: Target metrics — used to check completeness (extended)
     ALL_TARGET_METRICS = {
         'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
         'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
-        'ESG_SCORE'
+        'ESG_SCORE',
+        # 🆕 FIX 48: New metrics
+        'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE',
+        'CARBON_EMISSIONS',
     }
     
     def __init__(
@@ -2600,6 +2671,16 @@ class PDFEvaluationPipeline:
         # Combine: table rows always take precedence over text rows
         all_metrics = table_metrics + text_metrics
 
+        # =====================================================================
+        # 🆕 STAGE 4: EXTENDED METRIC EXTRACTION (Plugin — FIX 48)
+        # Runs AFTER all existing stages, BEFORE deduplication.
+        # Extracts: ENVIRONMENTAL_SCORE, SOCIAL_SCORE, GOVERNANCE_SCORE,
+        #           CARBON_EMISSIONS (from tables or derived from scopes)
+        # =====================================================================
+        from metric_extensions import run_extended_extraction
+        extended_metrics = run_extended_extraction(pdf_data, all_metrics)
+        all_metrics = all_metrics + extended_metrics
+
         # Deduplication — one winner per metric
         results['metrics'] = self.deduplicator.deduplicate(all_metrics)
         results['metrics'].sort(key=lambda x: x['confidence'], reverse=True)
@@ -2612,10 +2693,10 @@ class PDFEvaluationPipeline:
         if discarded_low_conf > 0:
             print(f"\n[Conf gate] Discarded {discarded_low_conf} metrics with confidence < 0.5")
 
-        # 🔥 FIX 46: Report metric completeness
+        # 🔥 FIX 46 + 🆕 FIX 48: Report metric completeness (extended to 11)
         final_metric_names = {m['normalized_metric'] for m in results['metrics']}
         still_missing = self.ALL_TARGET_METRICS - final_metric_names
-        print(f"\n[Completeness] Found: {len(final_metric_names)}/7 target metrics")
+        print(f"\n[Completeness] Found: {len(final_metric_names)}/11 target metrics")
         if still_missing:
             print(f"  ⚠ Still missing: {still_missing}")
         else:
