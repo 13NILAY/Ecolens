@@ -1,17 +1,22 @@
 """
-PHASE 2: MODEL TRAINING (UPDATED ARCHITECTURE)
-===============================================
+PHASE 2: MODEL TRAINING (UPDATED ARCHITECTURE — 11 METRICS)
+============================================================
 
-Trains models for the complete 11-layer architecture:
+Trains models for the complete 11-layer architecture with 11 target metrics:
 
 1-3. PDF Extraction & Preprocessing (Rule-based)
-4. ESG Candidate Filter (Classifier) ← NEW
-5. NER Model (BERT Token Classification)
-6. Metric Classifier (BERT Sequence Classification)
+4. ESG Candidate Filter (Classifier)
+5. NER Model (BERT Token Classification) — 11 metrics × 2 (B-/I-) + O = 23 labels
+6. Metric Classifier (BERT Sequence Classification) — 11 classes
 7-8. Context + Value Extraction (Hybrid: Regex + ML)
 9. Unit Normalization (Rule-based)
 10. Confidence Scoring (Ensemble)
-11. Validation (Rule-based + ML) ← NEW
+11. Validation (Rule-based + ML)
+
+Target Metrics (11):
+  SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION, WATER_USAGE,
+  WASTE_GENERATED, ESG_SCORE, ENVIRONMENTAL_SCORE, SOCIAL_SCORE,
+  GOVERNANCE_SCORE, CARBON_EMISSIONS
 
 Dependencies:
 pip install transformers torch scikit-learn seqeval
@@ -36,11 +41,14 @@ from pathlib import Path
 import re
 
 
-# TARGET METRICS — only these 7 metrics are used across the pipeline
+# TARGET METRICS — all 11 metrics used across the pipeline
 TARGET_METRICS = {
     'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
     'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
     'ESG_SCORE',
+    # Extended metrics (v9.0+)
+    'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE',
+    'CARBON_EMISSIONS',
 }
 
 

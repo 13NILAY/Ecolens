@@ -1,19 +1,24 @@
 """
-PHASES 3-6: EVALUATION, ROBUSTNESS, AND PRODUCTION (v3 — Delta Precision Fixes)
+PHASES 3-6: EVALUATION, ROBUSTNESS, AND PRODUCTION (v4 — 11 Metrics)
 ==========================================================================
 
-Complete evaluation and deployment for all 11 layers:
+Complete evaluation and deployment for all 11 layers with 11 target metrics:
 
 Layer 4: ESG Candidate Filter evaluation (v3: tighter gate, 70-85% target)
-Layer 5: NER model evaluation
-Layer 6: Metric Classifier evaluation
+Layer 5: NER model evaluation (23 labels: 11 metrics × B-/I- + O)
+Layer 6: Metric Classifier evaluation (11 classes)
 Layer 7-11: Value extraction, validation, end-to-end testing
+
+Target Metrics (11):
+  SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION, WATER_USAGE,
+  WASTE_GENERATED, ESG_SCORE, ENVIRONMENTAL_SCORE, SOCIAL_SCORE,
+  GOVERNANCE_SCORE, CARBON_EMISSIONS
 
 Plus:
 - Real-world PDF noise simulation (bugfix: noise now applied to every sample)
 - Confidence calibration (v3 target: avg 55-75%)
-- v3 guard checks: score metric values, noise integers, proximity filtering
-- Production deployment guide with v3 target metrics
+- v4 guard checks: score metric values (ESG + E/S/G scores), noise integers, proximity filtering
+- Production deployment guide with v4 target metrics (11 metrics)
 """
 
 import json
@@ -581,7 +586,7 @@ def main():
     """Run comprehensive evaluation and robustness testing"""
     
     print("\n" + "="*70)
-    print("ESG EXTRACTION: EVALUATION & ROBUSTNESS v3 (ALL 11 LAYERS)")
+    print("ESG EXTRACTION: EVALUATION & ROBUSTNESS v4 (ALL 11 LAYERS, 11 METRICS)")
     print("="*70)
     
     # 1. Add PDF noise to datasets
@@ -645,19 +650,21 @@ To evaluate the complete 11-layer pipeline (v3):
    # Error Analysis
    errors = evaluator.analyze_errors(predictions, ground_truth)
 
-4. TARGET METRICS (7 metrics only)
+4. TARGET METRICS (11 metrics)
    Target: SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION,
-           WATER_USAGE, WASTE_GENERATED, ESG_SCORE
+           WATER_USAGE, WASTE_GENERATED, ESG_SCORE,
+           ENVIRONMENTAL_SCORE, SOCIAL_SCORE, GOVERNANCE_SCORE,
+           CARBON_EMISSIONS
 
    Layer 4 (ESG Filter) — 2 keywords + conf >= 0.4:
      - Recall:    >0.90
      - Precision: >0.92
      - ESG chunk rate: 70-85%
 
-   Layer 5 (NER):
+   Layer 5 (NER — 23 labels: 11 metrics × B-/I- + O):
      - F1 Score:  >0.92
 
-   Layer 6 (Classifier — 7 classes):
+   Layer 6 (Classifier — 11 classes):
      - Accuracy:  >0.95
 
    Layers 7-9 (Value Extraction) — closest-only + proximity <=100:
@@ -671,12 +678,13 @@ To evaluate the complete 11-layer pipeline (v3):
 
    Layer 11 (Validation) — score metric guard:
      - Correct flagging:  >0.95
-     - ESG_SCORE false positives: 0  (values <20 or without score keyword discarded)
+     - *_SCORE false positives: 0  (values <20 or without score keyword discarded)
+     - CARBON_EMISSIONS must have valid emission unit (tCO2e etc.)
 
    End-to-End (All 11 layers):
      - Full accuracy: >0.82
-     - No ESG_SCORE metrics with value <20 in output
-     - Only 7 target metrics in output — no other metrics
+     - No *_SCORE metrics with value <20 in output
+     - Only 11 target metrics in output — no other metrics
 
 5. ITERATE
    - Identify weakest layer

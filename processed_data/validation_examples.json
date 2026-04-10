@@ -1,0 +1,275 @@
+[
+  {
+    "metric": "SCOPE_1",
+    "value": 82253937.92827332,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_1",
+    "value": 55110990.48902489,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_1",
+    "value": 36546953.56460841,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_2",
+    "value": 40623184.24463055,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_2",
+    "value": 85888846.00101373,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_2",
+    "value": 48726679.57105713,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_3",
+    "value": 447674959.0639522,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_3",
+    "value": 115236826.07587183,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_3",
+    "value": 1108065.5768857528,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ENERGY_CONSUMPTION",
+    "value": 10939360.841373187,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ENERGY_CONSUMPTION",
+    "value": 30398685.654367007,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ENERGY_CONSUMPTION",
+    "value": 46453371.9608166,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WATER_USAGE",
+    "value": 66396098.83660572,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WATER_USAGE",
+    "value": 74554536.23488419,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WATER_USAGE",
+    "value": 70559826.80088215,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WASTE_GENERATED",
+    "value": 9278020.005461484,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WASTE_GENERATED",
+    "value": 5414511.393101464,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "WASTE_GENERATED",
+    "value": 6037988.233084013,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ESG_SCORE",
+    "value": 61.77848367378418,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ESG_SCORE",
+    "value": 86.14464364935797,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "ESG_SCORE",
+    "value": 94.31226902358641,
+    "is_valid": true,
+    "issues": [],
+    "test_type": "valid_range"
+  },
+  {
+    "metric": "SCOPE_1",
+    "value": -499.9986965829614,
+    "is_valid": false,
+    "issues": [
+      "Value -499.9986965829614 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "SCOPE_1",
+    "value": 100007820.45999475,
+    "is_valid": false,
+    "issues": [
+      "Value 100007820.45999475 above maximum 100000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "SCOPE_2",
+    "value": -940.7670315864941,
+    "is_valid": false,
+    "issues": [
+      "Value -940.7670315864941 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "SCOPE_2",
+    "value": 100004983.49845935,
+    "is_valid": false,
+    "issues": [
+      "Value 100004983.49845935 above maximum 100000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "SCOPE_3",
+    "value": -482.36258732380315,
+    "is_valid": false,
+    "issues": [
+      "Value -482.36258732380315 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "SCOPE_3",
+    "value": 500008627.684358,
+    "is_valid": false,
+    "issues": [
+      "Value 500008627.684358 above maximum 500000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "ENERGY_CONSUMPTION",
+    "value": -265.6282688387505,
+    "is_valid": false,
+    "issues": [
+      "Value -265.6282688387505 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "ENERGY_CONSUMPTION",
+    "value": 50007013.552009024,
+    "is_valid": false,
+    "issues": [
+      "Value 50007013.552009024 above maximum 50000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "WATER_USAGE",
+    "value": -164.27535132976078,
+    "is_valid": false,
+    "issues": [
+      "Value -164.27535132976078 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "WATER_USAGE",
+    "value": 100009966.89389062,
+    "is_valid": false,
+    "issues": [
+      "Value 100009966.89389062 above maximum 100000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "WASTE_GENERATED",
+    "value": -257.8256004304036,
+    "is_valid": false,
+    "issues": [
+      "Value -257.8256004304036 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "WASTE_GENERATED",
+    "value": 10008271.94628067,
+    "is_valid": false,
+    "issues": [
+      "Value 10008271.94628067 above maximum 10000000"
+    ],
+    "test_type": "above_range"
+  },
+  {
+    "metric": "ESG_SCORE",
+    "value": -255.85161784792206,
+    "is_valid": false,
+    "issues": [
+      "Value -255.85161784792206 below minimum 0"
+    ],
+    "test_type": "below_range"
+  },
+  {
+    "metric": "ESG_SCORE",
+    "value": 2501.527671558128,
+    "is_valid": false,
+    "issues": [
+      "Value 2501.527671558128 above maximum 100"
+    ],
+    "test_type": "above_range"
+  }
+]
