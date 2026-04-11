@@ -1,0 +1,806 @@
+{
+  "file": "accenture-360-value-report-2025.pdf",
+  "pipeline_version": "v9.0_recovery_mode",
+  "metrics": [
+    {
+      "normalized_metric": "WATER_USAGE",
+      "value": 75585.0,
+      "unit": "KL",
+      "entity_text": "Employee Commuting 75,585 74,783 42,653 Total Water Consumption 1,524,942 1,495,728 1,442,861",
+      "context": "Employee Commuting 75,585 74,783 42,653 Total Water Consumption 1,524,942 1,495,728 1,442,861",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "CARBON_EMISSIONS",
+      "value": 576489.0,
+      "unit": "tCO2e",
+      "entity_text": "Derived: Scope1(19327.0) + Scope2(196334.0) + Scope3(360828.0)",
+      "context": "Computed as sum of Scope 1 + Scope 2 + Scope 3 emissions",
+      "section_type": "Environmental",
+      "confidence": 0.85,
+      "validation_status": "VALID",
+      "validation_issues": [
+        "derived_from_scopes"
+      ],
+      "source_type": "derived",
+      "page": 0
+    },
+    {
+      "normalized_metric": "SCOPE_1",
+      "value": 19327.0,
+      "unit": "tCO2e",
+      "entity_text": "Scope 1 19,327 22,395 22,038",
+      "context": "Scope 1 19,327 22,395 22,038",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "SCOPE_3",
+      "value": 360828.0,
+      "unit": "tCO2e",
+      "entity_text": "Scope 3 Carbon Emissions By Source Office Energy 360,828 345,860 360,973",
+      "context": "Scope 3 Carbon Emissions By Source Office Energy 360,828 345,860 360,973",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 67
+    },
+    {
+      "normalized_metric": "WASTE_GENERATED",
+      "value": 300.0,
+      "unit": "MT",
+      "entity_text": "Aggregated waste (3 categories)",
+      "context": "100% of our electronic waste (e-waste)\u2014such as; \u2022 We reused or recycled 100% of our e-waste relating; \u2022 We reused or recycled 100% of our furniture waste dioxide removal solution may",
+      "section_type": "Environmental",
+      "confidence": 0.7,
+      "validation_status": "VALID",
+      "validation_issues": [
+        "aggregated_from_categories"
+      ],
+      "source_type": "table_reconstructed",
+      "page": 35
+    }
+  ],
+  "discarded": [
+    {
+      "entity_text": "Sustainability Financial",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "Supply chain",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "water risk",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "office furniture",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "supplier sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 5
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 8
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "other mobility aids",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "Supply chain",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "SUSTAINABILITY",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "siness with a strong commitment to the We achieved our 90% Our new Learning to Earning initiative en",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 16
+    },
+    {
+      "entity_text": "sustainability goal",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Sustainable Procurement",
+      "reason": "invalid_unit_%_for_SCOPE_3",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Water risk Supplier",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "drought and",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "flooding, drought and water 90% of our key suppliers disclose We have set goals in alignment with th",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "Zero waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "electronic waste \u2022 In fiscal 2025, we achieved our 2025 carbon removal goal through the use of credits from our naturerelating to computers, servers and based carbon removal projects, which were applied to remaining emissions after reductions across our uninterruptible power supply devices Scope 1, 2 and 3 emissions. as well as all our office furniture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "Scope 1 3 GHG",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "Scope 1 and 2 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "water risk and moving decreased 91% from our fiscal 2019 base year against toward zero waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "energy-efficient practices",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "nature",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "sustainable",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 27
+    },
+    {
+      "entity_text": "purchased goods and services",
+      "reason": "value_below_min_500",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "electricity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "Renewable electricity",
+      "reason": "value_below_min_500",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_500",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "power purchase",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "renewable sources",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "energy efficiency",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "air,",
+      "reason": "value_below_min_500",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "hotel and",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "ground transport suppliers",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "Supplier",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "sustainability-focused",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "role-based Sustainable",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 34
+    },
+    {
+      "entity_text": "sustainability data with our clients as part of our delivery activities. technologies can also pose sustainability challenges",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 35
+    },
+    {
+      "entity_text": "Scope 3 emi",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 35
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Nature-based carbon",
+      "reason": "value_below_min_500",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "water risk",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "water-intensive",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "water",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "Sustainable Development",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "nature-based carbon",
+      "reason": "value_below_min_500",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "zero waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "zero waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "Energy Web e",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "aviation fueling network",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "E-waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "office furniture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "Direct air capture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "electronic waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "(",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "e-waste",
+      "reason": "value_below_min_500",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "electronic waste (e-waste)\u2014such as injected into the global aviation fuel",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "office furniture",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "direct air capture",
+      "reason": "value_below_min_500",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "innovative",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "technology-based carbon",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "waste dioxide removal solution",
+      "reason": "value_below_min_500",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Sustainable",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "aviation fuel",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "SAF industry",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "Scope 2 Procurement",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 45
+    },
+    {
+      "entity_text": "op",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "e 2 Procurement",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "electricity usage",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "purchased goods and services",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "other compliance training",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "AI-related matters",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 57
+    },
+    {
+      "entity_text": "other AI",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 60
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 60
+    },
+    {
+      "entity_text": "Sustainability Operations",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 60
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "energy sector",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "renewable solutions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "sustainable",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Sustainability Education",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "naire. our 2008-2009 Corporate Citizenship Report. contributed to the development of the ISSB Standa",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Sustainability Financial Reporting & Data 63 Accenture 360\u00b0 Value Report",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "sustainability priorities",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "sustainability priorities",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "other value chain partners",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Scope 2",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1 & 2 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Office Energy",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1 & 2 Carbon Emissions",
+      "reason": "invalid_unit_MWh_for_SCOPE_3",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Renewable Electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Renewable Electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Leased Cars",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Renewable Electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Office Electricity \u2014 \u2014 \u2014 Natural Gas",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Office Energy",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Purchased Goods & Services 302,715 250,369 218,240 % Electricity from",
+      "reason": "invalid_unit_%_for_SCOPE_1",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Office Electricity Efficiency",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Energy-Related Activities",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Total Water Consumption",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Scope 3 Carbon Emissions",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Water Consumption",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Water Stressed",
+      "reason": "invalid_unit_%_for_WATER_USAGE",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Water Consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "Office Electricity",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "renewable electricity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    }
+  ],
+  "statistics": {
+    "total_chunks": 378,
+    "esg_chunks": 80,
+    "esg_chunk_percentage": 21.16,
+    "table_extractions": 4,
+    "text_extractions": 1,
+    "discarded_extractions": 130,
+    "discarded_low_confidence": 1,
+    "final_metrics": 5,
+    "valid_metrics": 5,
+    "missing_metrics": [
+      "GOVERNANCE_SCORE",
+      "SCOPE_2",
+      "ENVIRONMENTAL_SCORE",
+      "ENERGY_CONSUMPTION",
+      "SOCIAL_SCORE",
+      "ESG_SCORE"
+    ],
+    "avg_confidence": 0.77,
+    "min_confidence": 0.7,
+    "max_confidence": 0.9
+  },
+  "warnings": [],
+  "discard_reasons": {
+    "esg_score_not_explicit": 20,
+    "no_valid_value_after_hard_filtering": 40,
+    "value_below_min_50000": 4,
+    "unknown_metric_classification": 17,
+    "value_below_min_5000": 6,
+    "paragraph_reject_keyword": 3,
+    "invalid_unit_%_for_SCOPE_3": 1,
+    "value_below_min_1000000": 14,
+    "value_below_min_500": 19,
+    "invalid_unit_MWh_for_SCOPE_3": 1,
+    "invalid_unit_%_for_SCOPE_1": 1,
+    "invalid_unit_%_for_WATER_USAGE": 4
+  },
+  "master_prompt_output": {
+    "WATER_USAGE": {
+      "value": 75585.0,
+      "unit": "KL",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "CARBON_EMISSIONS": {
+      "value": 576489.0,
+      "unit": "tCO2e",
+      "confidence": 0.85,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "derived",
+      "page": 0
+    },
+    "SCOPE_1": {
+      "value": 19327.0,
+      "unit": "tCO2e",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "SCOPE_3": {
+      "value": 360828.0,
+      "unit": "tCO2e",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 67
+    },
+    "WASTE_GENERATED": {
+      "value": 300.0,
+      "unit": "MT",
+      "confidence": 0.7,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "table_reconstructed",
+      "page": 35
+    }
+  }
+}

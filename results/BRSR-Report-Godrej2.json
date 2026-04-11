@@ -1,0 +1,1886 @@
+{
+  "file": "BRSR-Report-2023-2024 godrej.pdf",
+  "pipeline_version": "v9.0_recovery_mode",
+  "metrics": [
+    {
+      "normalized_metric": "SCOPE_1",
+      "value": 36076.0,
+      "unit": "tCO2e",
+      "entity_text": "Total Scope 1 Emissions 36,076 33,370",
+      "context": "Total Scope 1 Emissions 36,076 33,370",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 49
+    },
+    {
+      "normalized_metric": "SCOPE_2",
+      "value": 24362.0,
+      "unit": "tCO2e",
+      "entity_text": "Total Scope 2 Emissions 24,362 24,643",
+      "context": "Total Scope 2 Emissions 24,362 24,643",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 49
+    },
+    {
+      "normalized_metric": "SCOPE_3",
+      "value": 1482327.0,
+      "unit": "tCO2e",
+      "entity_text": "Total Scope 3 Emissions 14,82,327 13,33,796",
+      "context": "Total Scope 3 Emissions 14,82,327 13,33,796",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 53
+    },
+    {
+      "normalized_metric": "ENERGY_CONSUMPTION",
+      "value": 25810052.0,
+      "unit": "MJ",
+      "entity_text": "Total electricity consumption (A) MJ 2,58,10,052 2,53,54,444",
+      "context": "Total electricity consumption (A) MJ 2,58,10,052 2,53,54,444",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 46
+    },
+    {
+      "normalized_metric": "WASTE_GENERATED",
+      "value": 4730.0,
+      "unit": "MT",
+      "entity_text": "previous year which in turn increased our total waste generated from 4,730 MT to 5,136 MT for the pr",
+      "context": "previous year which in turn increased our total waste generated from 4,730 MT to 5,136 MT for the previous year",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 50
+    },
+    {
+      "normalized_metric": "WATER_USAGE",
+      "value": 1129.0,
+      "unit": "KL",
+      "entity_text": "Total WaterSaving in KL 1,129",
+      "context": "Total WaterSaving in KL 1,129",
+      "section_type": "Environmental",
+      "confidence": 0.9,
+      "validation_status": "VALID",
+      "validation_issues": [],
+      "source_type": "table_reconstructed",
+      "page": 54
+    },
+    {
+      "normalized_metric": "CARBON_EMISSIONS",
+      "value": 1542765.0,
+      "unit": "tCO2e",
+      "entity_text": "Derived: Scope1(36076.0) + Scope2(24362.0) + Scope3(1482327.0)",
+      "context": "Computed as sum of Scope 1 + Scope 2 + Scope 3 emissions",
+      "section_type": "Environmental",
+      "confidence": 0.85,
+      "validation_status": "VALID",
+      "validation_issues": [
+        "derived_from_scopes"
+      ],
+      "source_type": "derived",
+      "page": 0
+    }
+  ],
+  "discarded": [
+    {
+      "entity_text": "Greenhouse Gas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 0
+    },
+    {
+      "entity_text": "Business Responsibility",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 2
+    },
+    {
+      "entity_text": "Quality Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Other",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 4
+    },
+    {
+      "entity_text": "Total volume of",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 5
+    },
+    {
+      "entity_text": "water withdrawal",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 5
+    },
+    {
+      "entity_text": "water consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 5
+    },
+    {
+      "entity_text": "water discharged",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 5
+    },
+    {
+      "entity_text": "safety related",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 6
+    },
+    {
+      "entity_text": "total energy consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 6
+    },
+    {
+      "entity_text": "energy consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 6
+    },
+    {
+      "entity_text": "(",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 7
+    },
+    {
+      "entity_text": "Scope 1 and",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 7
+    },
+    {
+      "entity_text": "Scope 2 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 7
+    },
+    {
+      "entity_text": "nts with related parties Section C \u2013 Principle 6 \u2013 E4 Water discharge by destination and level of tr",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 8
+    },
+    {
+      "entity_text": "Greenhouse Gas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 9
+    },
+    {
+      "entity_text": "Corporate Value Chain",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 10
+    },
+    {
+      "entity_text": "(",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 10
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 10
+    },
+    {
+      "entity_text": "Greenhouse Gas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "the",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "Corporate Value Chain",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 11
+    },
+    {
+      "entity_text": "Quality Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "Quality Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "Other Assurance",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 12
+    },
+    {
+      "entity_text": "areas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "of",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "water stress",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "air emissions (other than GHG emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 14
+    },
+    {
+      "entity_text": "human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Sexual Harassment",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 15
+    },
+    {
+      "entity_text": "Scope 3 Limit",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 16
+    },
+    {
+      "entity_text": "Scope 3 Limited 279 BRSR Disclosure Description of indicator Level of Assurance Reclaimed products",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Principle",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Principle",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 17
+    },
+    {
+      "entity_text": "Water withdrawal, consumption and discharge",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "of",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water stress",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Water discharge",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "Total volume",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water withdrawal",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "water discharged",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 18
+    },
+    {
+      "entity_text": "waste management",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "total energy consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "energy consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "renewable sources",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "of greenhouse gas emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "Scope 1 an",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 19
+    },
+    {
+      "entity_text": "(",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Scope 1 and",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Scope 2 emissions) and its intensity Limited Level 305-3 Details of greenhouse gas emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Scope 3",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "air emissions (other than GHG emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Business Responsibility",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Corporate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 20
+    },
+    {
+      "entity_text": "Sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 21
+    },
+    {
+      "entity_text": "Other than",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Other than",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Board",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 22
+    },
+    {
+      "entity_text": "Key Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "permanent employees and workers (Disclose trends for the past 3 years) Turnover rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 23
+    },
+    {
+      "entity_text": "total",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "Subsidiary",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 24
+    },
+    {
+      "entity_text": "CSR",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "CSR",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "Net worth",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 25
+    },
+    {
+      "entity_text": "sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 26
+    },
+    {
+      "entity_text": "sustainability",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 27
+    },
+    {
+      "entity_text": "Value Chain",
+      "reason": "value_below_min_5000",
+      "chunk_idx": 27
+    },
+    {
+      "entity_text": "Occupational",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "Physical risk",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "Potential",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 28
+    },
+    {
+      "entity_text": "occupational health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "manufacturing plants",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 29
+    },
+    {
+      "entity_text": "chemical safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "alternative chemicals",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 30
+    },
+    {
+      "entity_text": "ES",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "chain of materials",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "ESG compliance risk",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 31
+    },
+    {
+      "entity_text": "ESG compliance",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "ESG",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "supplier adverse",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "Renewable Opportunity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "Energy energy",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "renewable energy",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "renewable energy will help emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 32
+    },
+    {
+      "entity_text": "lp emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "circularity",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "solar PV and apply for green tariffs",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 33
+    },
+    {
+      "entity_text": "Inclusion diversity ratio",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 34
+    },
+    {
+      "entity_text": "Total Number",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 35
+    },
+    {
+      "entity_text": "ESG scores",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 35
+    },
+    {
+      "entity_text": "Sustainable",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Chain and Procurement",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "Human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "product life-cycle",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 36
+    },
+    {
+      "entity_text": "safety and health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "sustainable",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "product life-cycle",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "Environmental safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "Electrical Safety Training",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "industrial Work",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "Environment Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "Road safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 37
+    },
+    {
+      "entity_text": "sexual harassment",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "Environmental safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "Electrical Safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "industrial Work",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "Environment Management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "Road safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 38
+    },
+    {
+      "entity_text": "Key",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 39
+    },
+    {
+      "entity_text": "Human Rights, 5 Greenhouse Gas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "EPR",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "Sustainability and",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "ESG sensitisation",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 40
+    },
+    {
+      "entity_text": "environmental impact",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "Solar power plants",
+      "reason": "value_below_min_1000000",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "renewable energy",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "water harvesting installations",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "freshwater withdrawal",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 41
+    },
+    {
+      "entity_text": "plastic,",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "paper, and",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "Producer Responsibility",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "waste collection",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 42
+    },
+    {
+      "entity_text": "Parental",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Work Rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Retention Rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Work Rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Retention Rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "Total",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 43
+    },
+    {
+      "entity_text": "category Association",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "category Association",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "Total Permanent Employees",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "Total Permanent Workers",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 44
+    },
+    {
+      "entity_text": "Health and safety management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "occupational health and safety management system",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 46
+    },
+    {
+      "entity_text": "safety & health management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 47
+    },
+    {
+      "entity_text": "safety and",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 47
+    },
+    {
+      "entity_text": "health management",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 47
+    },
+    {
+      "entity_text": "mental health awareness",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 50
+    },
+    {
+      "entity_text": "safety related Incidents in the following format: Category Financial Financial",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 50
+    },
+    {
+      "entity_text": "Safety Incident / Number Contract 24 (Current (Previous Workforce) Financial Year) Financial Year) Lost Time Injury Frequency Rate",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 50
+    },
+    {
+      "entity_text": "High",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "work-related injury",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "ill-health",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 51
+    },
+    {
+      "entity_text": "incident free",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 52
+    },
+    {
+      "entity_text": "People",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 52
+    },
+    {
+      "entity_text": "Safety Infrastructure",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 52
+    },
+    {
+      "entity_text": "safety competitions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 53
+    },
+    {
+      "entity_text": "safety awareness",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 53
+    },
+    {
+      "entity_text": "safety training",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 53
+    },
+    {
+      "entity_text": "overall environmental impact",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 58
+    },
+    {
+      "entity_text": "occupational health and safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 58
+    },
+    {
+      "entity_text": "Safety",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 58
+    },
+    {
+      "entity_text": "human rights",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 61
+    },
+    {
+      "entity_text": "ESG",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 61
+    },
+    {
+      "entity_text": "human",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 61
+    },
+    {
+      "entity_text": "third party",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 62
+    },
+    {
+      "entity_text": "community",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 63
+    },
+    {
+      "entity_text": "total energy consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "energy intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "Total electricity consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "Total fuel consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "Energy consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "other sources (C) - - Total e",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 65
+    },
+    {
+      "entity_text": "other sources",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "other sources",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Total Energy consumed from Non-Renewable Sources",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Total energy consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Energy intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "Total energy consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 66
+    },
+    {
+      "entity_text": "(",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "Total energy consumed/ MJ / 0.011 0.011 revenue from operations in crore rupees) Rupee Energy Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "Power Parity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "(",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "Total Energy consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "Energy intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "physical output",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 67
+    },
+    {
+      "entity_text": "National Greenhouse Gas",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 68
+    },
+    {
+      "entity_text": "Volume",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 68
+    },
+    {
+      "entity_text": "of",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Total volume of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "water consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Water intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Total water consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Water intensity per rupee of turnover adjusted for Purchasing Power",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Total water consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "Water intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 70
+    },
+    {
+      "entity_text": "household",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "waste water",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "water is discharged",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "treated water",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "air emissions",
+      "reason": "value_below_min_500",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Part",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 71
+    },
+    {
+      "entity_text": "Scope 1 and",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 2 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Total",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Total",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 2 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Total",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Scope 1",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 72
+    },
+    {
+      "entity_text": "Total",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1 and",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 2 Emission Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Total",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 2 GHG Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Total",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 2 Emission Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Purchasing Power",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "(",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Total",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 2 GHG Emissions",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Total",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 1 and",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "Scope 2 Emission Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 73
+    },
+    {
+      "entity_text": "pe 1",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Scope 2 Emission Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Physical Output",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Scope 1",
+      "reason": "value_below_min_500",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Stationary Combustion",
+      "reason": "value_below_min_500",
+      "chunk_idx": 74
+    },
+    {
+      "entity_text": "Scope 2 for FY 22-23 basis the emission",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "National Greenhouse Gas",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Volume 2 Chapter 1 including tCO2e (equivalent emission",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Scope 2 emission",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 75
+    },
+    {
+      "entity_text": "Green House Gas emission",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "solar power plants",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "the",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "renewable energy consumption and reduce GHG",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "open access power",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "thermal energy",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 76
+    },
+    {
+      "entity_text": "our boilers. GCPL is also planning to set up a 1.5 MW Biomass based Cogeneration Power Project in Ma",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 77
+    },
+    {
+      "entity_text": "Waste Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Total Waste Generated",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Waste Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Purchasing Power",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 78
+    },
+    {
+      "entity_text": "Purchasing",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "(",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "Total Waste Generated",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "Waste Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "physical output Waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "Waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "waste generated",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "total waste",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "other recovery",
+      "reason": "invalid_unit_tCO2e_for_WASTE_GENERATED",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "Other recovery",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 79
+    },
+    {
+      "entity_text": "waste reduction",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "Waste Management",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "the",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "hazardous waste generation",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "manufacturing facilities",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "Waste management",
+      "reason": "value_below_min_500",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "Energy recovery, and Treatment & Disposal",
+      "reason": "value_below_min_500",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "Waste-Management",
+      "reason": "value_below_min_500",
+      "chunk_idx": 80
+    },
+    {
+      "entity_text": "the",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "Water",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "Prevention and Control of Pollution",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "Air",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "Prevention and Control of Pollution",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "Environment",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 81
+    },
+    {
+      "entity_text": "pollution",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 82
+    },
+    {
+      "entity_text": "Water and",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 82
+    },
+    {
+      "entity_text": "Environmental",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 82
+    },
+    {
+      "entity_text": "Total Volume of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Withdrawal",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Total Volume of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Consumption",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "(",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Consumed",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Intensity in terms of physical output",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "product",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Water Discharge",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Into",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "Surface water",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 83
+    },
+    {
+      "entity_text": "of",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 84
+    },
+    {
+      "entity_text": "rain water harvested",
+      "reason": "value_below_min_50000",
+      "chunk_idx": 84
+    },
+    {
+      "entity_text": "total water withdrawal",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 84
+    },
+    {
+      "entity_text": "total Scope 3 emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 84
+    },
+    {
+      "entity_text": "Total Scope 3 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 84
+    },
+    {
+      "entity_text": "of",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "Total",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "Scope 3 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "Total Scope 3 Emissions",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "Total Scope 3 Emission Intensity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "physical output",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 85
+    },
+    {
+      "entity_text": "ecological",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 86
+    },
+    {
+      "entity_text": "environmental approval",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 86
+    },
+    {
+      "entity_text": "resource efficiency, or reduce impact due to emissions",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 86
+    },
+    {
+      "entity_text": "waste generated",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 86
+    },
+    {
+      "entity_text": "f such initiatives, as per the following format: Sr. Initiative Details of the initiative (Web-link,",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 87
+    },
+    {
+      "entity_text": "ving Roof Top Solar Panel 315kva 98,880 6 Energy Saving Shrink Wrap Machine-reducing the heater numb",
+      "reason": "paragraph_reject_keyword",
+      "chunk_idx": 88
+    },
+    {
+      "entity_text": "Energy Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "machine hopper",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Energy",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Energy Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "industrial",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Energy Saving Reduce no. of light in in RM/PM by installing flood light",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Total Energy Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Water Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Water Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "canteen",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Water Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "water",
+      "reason": "unknown_metric_classification",
+      "chunk_idx": 89
+    },
+    {
+      "entity_text": "Water Saving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 90
+    },
+    {
+      "entity_text": "water holding capacity",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 90
+    },
+    {
+      "entity_text": "Total WaterSaving",
+      "reason": "no_valid_value_after_hard_filtering",
+      "chunk_idx": 90
+    },
+    {
+      "entity_text": "economic",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 91
+    },
+    {
+      "entity_text": "internal",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 91
+    },
+    {
+      "entity_text": "external risk",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 91
+    },
+    {
+      "entity_text": "ESG",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 92
+    },
+    {
+      "entity_text": "value chain partners",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 92
+    },
+    {
+      "entity_text": "Recycling",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 93
+    },
+    {
+      "entity_text": "safe disposal",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 93
+    },
+    {
+      "entity_text": "Information Security",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 94
+    },
+    {
+      "entity_text": "cyber security",
+      "reason": "esg_score_not_explicit",
+      "chunk_idx": 94
+    }
+  ],
+  "statistics": {
+    "total_chunks": 319,
+    "esg_chunks": 95,
+    "esg_chunk_percentage": 29.78,
+    "table_extractions": 6,
+    "text_extractions": 0,
+    "discarded_extractions": 339,
+    "discarded_low_confidence": 0,
+    "final_metrics": 7,
+    "valid_metrics": 7,
+    "missing_metrics": [
+      "ENVIRONMENTAL_SCORE",
+      "GOVERNANCE_SCORE",
+      "ESG_SCORE",
+      "SOCIAL_SCORE"
+    ],
+    "avg_confidence": 0.8929,
+    "min_confidence": 0.85,
+    "max_confidence": 0.9
+  },
+  "warnings": [],
+  "discard_reasons": {
+    "esg_score_not_explicit": 164,
+    "no_valid_value_after_hard_filtering": 127,
+    "paragraph_reject_keyword": 4,
+    "unknown_metric_classification": 27,
+    "value_below_min_5000": 2,
+    "value_below_min_50000": 6,
+    "value_below_min_1000000": 2,
+    "value_below_min_500": 6,
+    "invalid_unit_tCO2e_for_WASTE_GENERATED": 1
+  },
+  "master_prompt_output": {
+    "SCOPE_1": {
+      "value": 36076.0,
+      "unit": "tCO2e",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 49
+    },
+    "SCOPE_2": {
+      "value": 24362.0,
+      "unit": "tCO2e",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 49
+    },
+    "SCOPE_3": {
+      "value": 1482327.0,
+      "unit": "tCO2e",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 53
+    },
+    "ENERGY_CONSUMPTION": {
+      "value": 25810052.0,
+      "unit": "MJ",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 46
+    },
+    "WASTE_GENERATED": {
+      "value": 4730.0,
+      "unit": "MT",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 50
+    },
+    "WATER_USAGE": {
+      "value": 1129.0,
+      "unit": "KL",
+      "confidence": 0.9,
+      "confidence_band": "high (0.9-1.0)",
+      "source": "table_reconstructed",
+      "page": 54
+    },
+    "CARBON_EMISSIONS": {
+      "value": 1542765.0,
+      "unit": "tCO2e",
+      "confidence": 0.85,
+      "confidence_band": "good (0.7-0.8)",
+      "source": "derived",
+      "page": 0
+    }
+  }
+}

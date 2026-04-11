@@ -1,0 +1,58 @@
+{
+  "SCOPE_1": {
+    "value": 20494.8,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 153
+  },
+  "SCOPE_2": {
+    "value": 55599.0,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 153
+  },
+  "SCOPE_3": {
+    "value": 523810.0,
+    "unit": "tCO2e",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 159
+  },
+  "ENERGY_CONSUMPTION": {
+    "value": 1537495415.0,
+    "unit": "MJ",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 151
+  },
+  "WATER_USAGE": {
+    "value": 616485.0,
+    "unit": "KL",
+    "confidence": 0.9,
+    "confidence_band": "high (0.9-1.0)",
+    "source": "table_reconstructed",
+    "page": 152
+  },
+  "CARBON_EMISSIONS": {
+    "value": 599903.8,
+    "unit": "tCO2e",
+    "confidence": 0.85,
+    "confidence_band": "good (0.7-0.8)",
+    "source": "derived",
+    "page": 0
+  },
+  "WASTE_GENERATED": {
+    "value": 20467.6,
+    "unit": "MT",
+    "confidence": 0.7,
+    "confidence_band": "good (0.7-0.8)",
+    "source": "table_reconstructed",
+    "page": 156
+  }
+}

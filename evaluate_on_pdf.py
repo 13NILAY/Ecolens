@@ -395,11 +395,8 @@ class TableReconstructor:
     }
     
     ENERGY_PATTERNS = [
-        re.compile(r'total\s+electricity\s+consumption', re.I),
         re.compile(r'total\s+energy\s+consumption', re.I),
-        re.compile(r'total\s+energy', re.I),
-        re.compile(r'electricity\s+consumption', re.I),
-        re.compile(r'energy\s+consumption', re.I),
+        re.compile(r'total\s+electricity\s+consumption', re.I),
     ]
     
     WASTE_PATTERNS = [
@@ -572,13 +569,35 @@ class TableReconstructor:
         return False
     
     @classmethod
+    def _score_row(cls, text: str) -> int:
+        """
+        Score a row based on priority keywords.
+        Higher score = more likely to be the total/summary row.
+        """
+        text_lower = text.lower()
+        score = 1  # Default match score
+        
+        if 'total' in text_lower:
+            score += 5
+        if 'overall' in text_lower:
+            score += 4
+        if 'consumption' in text_lower:
+            score += 3
+        if 'gross' in text_lower:
+            score += 2
+        
+        return score
+    
+    @classmethod
     def _extract_first_valid_number(cls, text: str, min_value: float = 1.0) -> Optional[float]:
         """
-        Extract the FIRST valid number from text.
-        COLUMN RULE: First number = current year, second = previous year.
+        Extract the LAST valid number from text (latest year column).
+        COLUMN RULE: Last number = current year, first = old year.
         Skip noise values (page numbers, years, IDs).
         """
         numbers = re.findall(r'[\d,]+\.?\d*', text)
+        valid_numbers = []
+        
         for num_str in numbers:
             try:
                 value = float(num_str.replace(",", ""))
@@ -593,8 +612,10 @@ class TableReconstructor:
             if value in {1, 2, 3, 4, 5, 10}:  # Noise
                 continue
             
-            return value
-        return None
+            valid_numbers.append(value)
+        
+        # Return LAST valid number (latest year)
+        return valid_numbers[-1] if valid_numbers else None
     
     @classmethod
     def _extract_scope(cls, rows: List[Dict], patterns: List[re.Pattern], 
@@ -602,8 +623,11 @@ class TableReconstructor:
         """
         Extract scope emission value.
         Priority: "total scope X" > "scope X emission" > "scope X"
-        Always pick FIRST number (current year).
+        Collect all candidates, score them, and return best match.
+        Always pick LAST number (current year).
         """
+        candidates = []
+        
         # Try patterns in priority order
         for pattern in patterns:
             for row_info in rows:
@@ -614,32 +638,47 @@ class TableReconstructor:
                 
                 if pattern.search(row_text):
                     value = cls._extract_first_valid_number(row_text, min_value=100)
-                    if value is not None and value >= 100:
-                        # Detect unit
-                        unit = cls._detect_emission_unit(row_text)
-                        
-                        return {
-                            'normalized_metric': metric_name,
+                    if value is not None and value >= 1000:  # FIX 5: Minimum sanity threshold
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
                             'value': value,
-                            'unit': unit,
-                            'entity_text': row_text[:100],
-                            'context': row_text[:200],
-                            'section_type': 'Environmental',
-                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_text.lower() else CONFIDENCE_TABLE_ONLY,
-                            'validation_status': 'VALID',
-                            'validation_issues': [],
-                            'source_type': 'table_reconstructed',
                             'page': row_info['page'],
-                        }
+                            'score': score,
+                        })
+        
+        # Return highest scored candidate
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            unit = cls._detect_emission_unit(best['row_text'])
+            
+            print(f"[DEBUG] Selected row: {best['row_text'][:80]} → value: {best['value']}")
+            
+            return {
+                'normalized_metric': metric_name,
+                'value': best['value'],
+                'unit': unit,
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
         return None
     
     @classmethod
     def _extract_energy(cls, rows: List[Dict]) -> Optional[Dict]:
         """
         Extract energy consumption.
-        Look for "total electricity/energy consumption".
-        Ignore small values (< 500).
+        Look for "total energy consumption" or "total electricity consumption".
+        Collect all candidates, score them, and return best match.
+        Reject if value < 1e8 (100 million).
         """
+        candidates = []
+        
         for pattern in cls.ENERGY_PATTERNS:
             for row_info in rows:
                 row_text = row_info['text']
@@ -649,31 +688,46 @@ class TableReconstructor:
                 
                 if pattern.search(row_text):
                     value = cls._extract_first_valid_number(row_text, min_value=500)
-                    if value is not None:
-                        unit = cls._detect_energy_unit(row_text)
-                        
-                        return {
-                            'normalized_metric': 'ENERGY_CONSUMPTION',
+                    # FIX 5: Sanity validation - reject if < 100 million
+                    if value is not None and value >= 1e8:
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
                             'value': value,
-                            'unit': unit,
-                            'entity_text': row_text[:100],
-                            'context': row_text[:200],
-                            'section_type': 'Environmental',
-                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_text.lower() else CONFIDENCE_TABLE_ONLY,
-                            'validation_status': 'VALID',
-                            'validation_issues': [],
-                            'source_type': 'table_reconstructed',
                             'page': row_info['page'],
-                        }
+                            'score': score,
+                        })
+        
+        # Return highest scored candidate
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            unit = cls._detect_energy_unit(best['row_text'])
+            
+            print(f"[DEBUG] Selected row: {best['row_text'][:80]} → value: {best['value']}")
+            
+            return {
+                'normalized_metric': 'ENERGY_CONSUMPTION',
+                'value': best['value'],
+                'unit': unit,
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
         return None
     
     @classmethod
     def _extract_waste(cls, rows: List[Dict]) -> Optional[Dict]:
         """
-        Extract waste: look for 'total waste' first.
+        Extract waste: look for 'total waste' first with row scoring.
         If not found, SUM all waste-related rows.
         """
-        # First try: total waste row
+        # First try: total waste row - collect candidates and score
+        candidates = []
         for row_info in rows:
             row_text = row_info['text']
             if cls._is_rejected(row_text):
@@ -681,19 +735,33 @@ class TableReconstructor:
             if re.search(r'total\s+waste', row_text, re.I):
                 value = cls._extract_first_valid_number(row_text, min_value=10)
                 if value is not None:
-                    return {
-                        'normalized_metric': 'WASTE_GENERATED',
+                    score = cls._score_row(row_text)
+                    candidates.append({
+                        'row_text': row_text,
                         'value': value,
-                        'unit': cls._detect_waste_unit(row_text),
-                        'entity_text': row_text[:100],
-                        'context': row_text[:200],
-                        'section_type': 'Environmental',
-                        'confidence': CONFIDENCE_TABLE_TOTAL,
-                        'validation_status': 'VALID',
-                        'validation_issues': [],
-                        'source_type': 'table_reconstructed',
                         'page': row_info['page'],
-                    }
+                        'score': score,
+                    })
+        
+        # If found total waste candidates, return best
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            
+            print(f"[DEBUG] Selected row: {best['row_text'][:80]} → value: {best['value']}")
+            
+            return {
+                'normalized_metric': 'WASTE_GENERATED',
+                'value': best['value'],
+                'unit': cls._detect_waste_unit(best['row_text']),
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_TOTAL,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
         
         # Fallback: aggregate all waste rows
         total = 0.0
@@ -748,32 +816,90 @@ class TableReconstructor:
     @classmethod
     def _extract_water(cls, rows: List[Dict]) -> Optional[Dict]:
         """
-        Extract water: look for 'total water' first.
-        If not found, SUM all water source rows (groundwater, surface, third party).
+        Extract water usage.
+        PRIORITY:
+          1. "water consumption" (best)
+          2. "total water" (fallback)
+          3. DO NOT aggregate sources if consumption exists
+        Reject if value < 10000.
         """
-        # First try: total water row
+        # PRIORITY 1: Look for water consumption with scoring
+        consumption_candidates = []
+        for row_info in rows:
+            row_text = row_info['text']
+            if cls._is_rejected(row_text):
+                continue
+            if re.search(r'water\s+consumption', row_text, re.I):
+                value = cls._extract_first_valid_number(row_text, min_value=100)
+                # FIX 5: Sanity validation - reject if < 10,000
+                if value is not None and value >= 10000:
+                    score = cls._score_row(row_text)
+                    consumption_candidates.append({
+                        'row_text': row_text,
+                        'value': value,
+                        'page': row_info['page'],
+                        'score': score,
+                    })
+        
+        # If consumption found, return it (don't aggregate)
+        if consumption_candidates:
+            best = max(consumption_candidates, key=lambda c: c['score'])
+            
+            print(f"[DEBUG] Selected row: {best['row_text'][:80]} → value: {best['value']}")
+            
+            return {
+                'normalized_metric': 'WATER_USAGE',
+                'value': best['value'],
+                'unit': cls._detect_water_unit(best['row_text']),
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_TOTAL,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        
+        # PRIORITY 2: Fallback to "total water" with scoring
+        total_water_candidates = []
         for row_info in rows:
             row_text = row_info['text']
             if cls._is_rejected(row_text):
                 continue
             if re.search(r'total\s+water', row_text, re.I):
                 value = cls._extract_first_valid_number(row_text, min_value=100)
-                if value is not None:
-                    return {
-                        'normalized_metric': 'WATER_USAGE',
+                # FIX 5: Sanity validation - reject if < 10,000
+                if value is not None and value >= 10000:
+                    score = cls._score_row(row_text)
+                    total_water_candidates.append({
+                        'row_text': row_text,
                         'value': value,
-                        'unit': cls._detect_water_unit(row_text),
-                        'entity_text': row_text[:100],
-                        'context': row_text[:200],
-                        'section_type': 'Environmental',
-                        'confidence': CONFIDENCE_TABLE_TOTAL,
-                        'validation_status': 'VALID',
-                        'validation_issues': [],
-                        'source_type': 'table_reconstructed',
                         'page': row_info['page'],
-                    }
+                        'score': score,
+                    })
         
-        # Fallback: aggregate water sources
+        # If total water found, return it (don't aggregate)
+        if total_water_candidates:
+            best = max(total_water_candidates, key=lambda c: c['score'])
+            
+            print(f"[DEBUG] Selected row: {best['row_text'][:80]} → value: {best['value']}")
+            
+            return {
+                'normalized_metric': 'WATER_USAGE',
+                'value': best['value'],
+                'unit': cls._detect_water_unit(best['row_text']),
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Environmental',
+                'confidence': CONFIDENCE_TABLE_TOTAL,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        
+        # PRIORITY 3: Last resort - aggregate water sources (only if no consumption/total found)
         total = 0.0
         pages = []
         contexts = []
@@ -806,7 +932,8 @@ class TableReconstructor:
                 pages.append(row_info['page'])
                 contexts.append(row_text[:80])
         
-        if total > 0:
+        # FIX 5: Sanity validation on aggregated value
+        if total >= 10000:
             return {
                 'normalized_metric': 'WATER_USAGE',
                 'value': round(total, 2),
