@@ -56,24 +56,33 @@ import numpy as np
 # CONSTANTS & CONFIGURATION
 # ============================================================================
 
-# 🎯 FIX 7: STRICT TARGET METRICS - Only extract these 7
+# 🎯 STRICT TARGET METRICS — Final 11 metrics
 TARGET_METRICS: Set[str] = {
     'SCOPE_1',
-    'SCOPE_2', 
+    'SCOPE_2',
     'SCOPE_3',
-    'ESG_SCORE',
-    'WASTE_GENERATED',
     'ENERGY_CONSUMPTION',
-    'WATER_USAGE'
+    'WATER_USAGE',
+    'WASTE_GENERATED',
+    'GENDER_DIVERSITY',
+    'SAFETY_INCIDENTS',
+    'EMPLOYEE_WELLBEING',
+    'DATA_BREACHES',
+    'COMPLAINTS',
 }
 
-# 🆕 FIX 48: EXTENDED TARGET METRICS — 4 new metrics (additive)
-TARGET_METRICS.update({
-    'ENVIRONMENTAL_SCORE',
-    'SOCIAL_SCORE',
-    'GOVERNANCE_SCORE',
-    'CARBON_EMISSIONS',
-})
+# 🎯 SOURCE PRIORITY — Dynamic reliability scoring by extraction source
+# Higher = more trustworthy.  Used by MetricSelector.compute_final_score().
+SOURCE_PRIORITY: Dict[str, float] = {
+    'table_reconstructed': 1.0,   # TableReconstructor structured extraction
+    'table':               0.9,   # EnhancedTableParser / legacy grid parser
+    'text':                0.7,   # paragraph / text-block extraction
+    'ner_model':           0.6,   # NER model direct output
+    'classifier':          0.5,   # classifier-only path
+    'plugin':              0.6,   # metric_extensions plugin
+    'derived':             0.55,  # computed / derived metrics
+    'paragraph':           0.7,   # alias for text
+}
 
 # Unit Whitelist — ✅ FIX 12: Expanded with comprehensive ESG unit patterns
 VALID_UNITS: Set[str] = {
@@ -128,16 +137,12 @@ STRICT_UNIT_MAP: Dict[str, Set[str]] = {
     'ENERGY_CONSUMPTION': {'MJ', 'GJ', 'TJ', 'PJ', 'kWh', 'MWh', 'GWh', 'Mn kWh'},
     'WATER_USAGE': {'KL', 'm³', 'm3', 'ML', 'GL'},
     'WASTE_GENERATED': {'tonnes', 'MT', 'kt', 't', 'kg'},
-    'ESG_SCORE': set(),  # unitless
+    'GENDER_DIVERSITY': {'%'},
+    'SAFETY_INCIDENTS': set(),     # count-based, unitless
+    'EMPLOYEE_WELLBEING': {'%'},
+    'DATA_BREACHES': set(),        # count-based, unitless
+    'COMPLAINTS': set(),           # count-based, unitless
 }
-
-# 🆕 FIX 48: Extended unit map for new metrics (additive)
-STRICT_UNIT_MAP.update({
-    'ENVIRONMENTAL_SCORE': set(),  # unitless
-    'SOCIAL_SCORE': set(),         # unitless
-    'GOVERNANCE_SCORE': set(),     # unitless
-    'CARBON_EMISSIONS': {'tCO2e', 'Mt CO2e', 'MtCO2e', 'ktCO2e', 'tCO2', 'tonnes CO2', 'tonnes', 't', 'MT'},
-})
 
 # Metric-specific keywords
 METRIC_KEYWORDS: Dict[str, List[str]] = {
@@ -147,21 +152,14 @@ METRIC_KEYWORDS: Dict[str, List[str]] = {
     'ENERGY_CONSUMPTION': ['energy', 'electricity', 'power', 'consumption', 'kwh', 'mwh', 'gwh'],
     'WATER_USAGE': ['water', 'withdrawal', 'discharge', 'consumption'],
     'WASTE_GENERATED': ['waste', 'generated', 'disposal', 'solid waste'],
-    'ESG_SCORE': ['esg', 'score', 'rating', 'sustainability', 'index'],
+    'GENDER_DIVERSITY': ['gender', 'diversity', 'women', 'female', 'male', 'workforce composition'],
+    'SAFETY_INCIDENTS': ['safety', 'incident', 'injury', 'accident', 'fatality', 'ltifr', 'lost time'],
+    'EMPLOYEE_WELLBEING': ['wellbeing', 'well-being', 'training', 'turnover', 'attrition', 'satisfaction'],
+    'DATA_BREACHES': ['data breach', 'cyber', 'security incident', 'privacy', 'data leak'],
+    'COMPLAINTS': ['complaint', 'grievance', 'whistleblower', 'ethics violation'],
 }
 
-# 🆕 FIX 48: Extended keywords for new metrics (additive)
-METRIC_KEYWORDS.update({
-    'ENVIRONMENTAL_SCORE': ['environmental score', 'environment score', 'e score', 'environmental rating', 'environmental pillar'],
-    'SOCIAL_SCORE': ['social score', 's score', 'social rating', 'social pillar'],
-    'GOVERNANCE_SCORE': ['governance score', 'g score', 'governance rating', 'governance pillar'],
-    'CARBON_EMISSIONS': ['total emissions', 'total carbon', 'total ghg', 'overall emissions', 'carbon emissions', 'co2 emissions'],
-})
-
-UNITLESS_ALLOWED_METRICS: Set[str] = {'ESG_SCORE'}
-
-# 🆕 FIX 48: Score metrics are also unitless (additive)
-UNITLESS_ALLOWED_METRICS.update({'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE'})
+UNITLESS_ALLOWED_METRICS: Set[str] = {'SAFETY_INCIDENTS', 'DATA_BREACHES', 'COMPLAINTS'}
 
 TEMPORAL_KEYWORDS: List[str] = [
     'compared', 'previous', 'last year', 'prior year', 'preceding',
@@ -261,41 +259,33 @@ KG_TO_TONNE_METRICS: Set[str] = {'SCOPE_1', 'SCOPE_2', 'SCOPE_3', 'WASTE_GENERAT
 # ✅ FIX 35 + 🔥 FIX 43: Minimum value thresholds (RELAXED for recovery mode)
 # Stage 1 (strict) uses these; Stage 2 (relaxed) uses RELAXED_MIN_VALUES
 MIN_VALUES = {
-    'SCOPE_1': 500,       # was 1000 — relaxed to avoid rejecting valid SME data
-    'SCOPE_2': 500,       # was 1000
-    'SCOPE_3': 5000,      # was 10000
-    'WATER_USAGE': 50000,   # was 100000 KL
-    'ENERGY_CONSUMPTION': 1_000_000,  # was 1e8 MJ — relaxed to 1e6
-    'WASTE_GENERATED': 500,   # was 1000 tonnes
-    'ESG_SCORE': 0,       # no minimum
+    'SCOPE_1': 500,
+    'SCOPE_2': 500,
+    'SCOPE_3': 5000,
+    'WATER_USAGE': 50000,
+    'ENERGY_CONSUMPTION': 1_000_000,
+    'WASTE_GENERATED': 500,
+    'GENDER_DIVERSITY': 0,
+    'SAFETY_INCIDENTS': 0,
+    'EMPLOYEE_WELLBEING': 0,
+    'DATA_BREACHES': 0,
+    'COMPLAINTS': 0,
 }
-
-# 🆕 FIX 48: Thresholds for new metrics (additive)
-MIN_VALUES.update({
-    'ENVIRONMENTAL_SCORE': 0,
-    'SOCIAL_SCORE': 0,
-    'GOVERNANCE_SCORE': 0,
-    'CARBON_EMISSIONS': 500,
-})
 
 # 🔥 FIX 43: Stage 2 relaxed thresholds
 RELAXED_MIN_VALUES = {
     'SCOPE_1': 100,
     'SCOPE_2': 100,
-    'SCOPE_3': 1000,       # spec: ≥1000
-    'WATER_USAGE': 50000,    # spec: ≥50,000
-    'ENERGY_CONSUMPTION': 1_000_000,  # spec: ≥1e6 MJ
+    'SCOPE_3': 1000,
+    'WATER_USAGE': 50000,
+    'ENERGY_CONSUMPTION': 1_000_000,
     'WASTE_GENERATED': 100,
-    'ESG_SCORE': 0,
+    'GENDER_DIVERSITY': 0,
+    'SAFETY_INCIDENTS': 0,
+    'EMPLOYEE_WELLBEING': 0,
+    'DATA_BREACHES': 0,
+    'COMPLAINTS': 0,
 }
-
-# 🆕 FIX 48: Relaxed thresholds for new metrics (additive)
-RELAXED_MIN_VALUES.update({
-    'ENVIRONMENTAL_SCORE': 0,
-    'SOCIAL_SCORE': 0,
-    'GOVERNANCE_SCORE': 0,
-    'CARBON_EMISSIONS': 100,
-})
 
 # ✅ FIX 39: Confidence base values (aligned to spec)
 CONFIDENCE_TABLE_TOTAL = 0.90     # table + strong context (total row)
@@ -425,6 +415,56 @@ class TableReconstructor:
         re.compile(r'rainwater', re.I),
     ]
     
+    # --- Social / Governance metric patterns ---
+    
+    GENDER_DIVERSITY_PATTERNS = [
+        re.compile(r'women\s+(?:in\s+)?(?:workforce|employees|total)', re.I),
+        re.compile(r'female\s+(?:employees|representation|workforce|workers)', re.I),
+        re.compile(r'gender\s+diversity', re.I),
+        re.compile(r'(?:percentage|%|proportion)\s+(?:of\s+)?(?:women|female)', re.I),
+        re.compile(r'workforce\s+diversity', re.I),
+        re.compile(r'women\s+employees', re.I),
+    ]
+    
+    SAFETY_INCIDENTS_PATTERNS = [
+        re.compile(r'(?:total|number\s+of)\s+(?:safety\s+)?incidents?', re.I),
+        re.compile(r'(?:total|number\s+of)\s+(?:recordable\s+)?injur(?:y|ies)', re.I),
+        re.compile(r'lost\s+time\s+injur(?:y|ies)', re.I),
+        re.compile(r'\bltifr\b', re.I),
+        re.compile(r'fatalit(?:y|ies)', re.I),
+        re.compile(r'occupational\s+(?:health.*)?incident', re.I),
+        re.compile(r'workplace\s+accident', re.I),
+        re.compile(r'reportable\s+incident', re.I),
+    ]
+    
+    EMPLOYEE_WELLBEING_PATTERNS = [
+        re.compile(r'(?:total|average)\s+training\s+hours', re.I),
+        re.compile(r'employee\s+(?:turnover|attrition)\s+(?:rate)?', re.I),
+        re.compile(r'employee\s+well.?being', re.I),
+        re.compile(r'employee\s+satisfaction', re.I),
+        re.compile(r'training\s+hours\s+per\s+employee', re.I),
+        re.compile(r'attrition\s+rate', re.I),
+    ]
+    
+    DATA_BREACHES_PATTERNS = [
+        re.compile(r'(?:number\s+of\s+)?data\s+breach', re.I),
+        re.compile(r'cyber\s*(?:security)?\s*incident', re.I),
+        re.compile(r'(?:number\s+of\s+)?(?:information|data)\s+security\s+incident', re.I),
+        re.compile(r'privacy\s+breach', re.I),
+        re.compile(r'no\s+(?:data\s+)?breach', re.I),
+        re.compile(r'(?:zero|nil|0)\s+(?:data\s+)?breach', re.I),
+    ]
+    
+    COMPLAINTS_PATTERNS = [
+        re.compile(r'(?:total|number\s+of)\s+complaints?\s+(?:received|filed|reported)?', re.I),
+        re.compile(r'(?:total|number\s+of)\s+grievance', re.I),
+        re.compile(r'consumer\s+complaints?', re.I),
+        re.compile(r'customer\s+complaints?', re.I),
+        re.compile(r'whistleblower\s+complaints?', re.I),
+        re.compile(r'stakeholder\s+complaints?', re.I),
+        re.compile(r'complaints?\s+(?:under|related\s+to)', re.I),
+    ]
+    
     # Reject patterns (intensity, targets, etc.)
     REJECT_PATTERNS = [
         re.compile(r'\bper\s+(employee|fte|unit|tonne|kwh|mwh|revenue|capita)', re.I),
@@ -492,6 +532,43 @@ class TableReconstructor:
             metrics['WATER_USAGE'] = water
             print(f"    ✅ [TR] WATER_USAGE: {water['value']} {water['unit']} "
                   f"(page {water['page']})")
+        
+        # --- Social / Governance metrics ---
+        
+        # Extract gender diversity
+        gender = cls._extract_gender_diversity(all_rows)
+        if gender:
+            metrics['GENDER_DIVERSITY'] = gender
+            print(f"    ✅ [TR] GENDER_DIVERSITY: {gender['value']} {gender['unit']} "
+                  f"(page {gender['page']})")
+        
+        # Extract safety incidents
+        safety = cls._extract_safety_incidents(all_rows)
+        if safety:
+            metrics['SAFETY_INCIDENTS'] = safety
+            print(f"    ✅ [TR] SAFETY_INCIDENTS: {safety['value']} {safety['unit']} "
+                  f"(page {safety['page']})")
+        
+        # Extract employee wellbeing
+        wellbeing = cls._extract_employee_wellbeing(all_rows)
+        if wellbeing:
+            metrics['EMPLOYEE_WELLBEING'] = wellbeing
+            print(f"    ✅ [TR] EMPLOYEE_WELLBEING: {wellbeing['value']} {wellbeing['unit']} "
+                  f"(page {wellbeing['page']})")
+        
+        # Extract data breaches
+        breaches = cls._extract_data_breaches(all_rows)
+        if breaches:
+            metrics['DATA_BREACHES'] = breaches
+            print(f"    ✅ [TR] DATA_BREACHES: {breaches['value']} {breaches['unit']} "
+                  f"(page {breaches['page']})")
+        
+        # Extract complaints
+        complaints = cls._extract_complaints(all_rows)
+        if complaints:
+            metrics['COMPLAINTS'] = complaints
+            print(f"    ✅ [TR] COMPLAINTS: {complaints['value']} {complaints['unit']} "
+                  f"(page {complaints['page']})")
         
         return list(metrics.values())
     
@@ -1013,6 +1090,261 @@ class TableReconstructor:
         if 'ml' in text_lower and 'million' in text_lower:
             return 'ML'
         return 'KL'  # default for water
+    
+    # ------------------------------------------------------------------
+    # SOCIAL / GOVERNANCE METRIC EXTRACTION
+    # ------------------------------------------------------------------
+    
+    @classmethod
+    def _extract_gender_diversity(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract gender diversity (percentage of women in workforce).
+        Value must be 0–100 (percentage).
+        """
+        candidates = []
+        
+        for pattern in cls.GENDER_DIVERSITY_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.1)
+                    if value is not None and 0 < value <= 100:
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': value,
+                            'page': row_info['page'],
+                            'score': score,
+                        })
+        
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            return {
+                'normalized_metric': 'GENDER_DIVERSITY',
+                'value': best['value'],
+                'unit': '%',
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Social',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        return None
+    
+    @classmethod
+    def _extract_safety_incidents(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract safety incidents count.
+        Accept value == 0 (legitimate: no incidents).
+        Also detect 'no incidents' / 'nil' / 'zero' as value=0.
+        """
+        candidates = []
+        
+        for pattern in cls.SAFETY_INCIDENTS_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    row_lower = row_text.lower()
+                    
+                    # Detect explicit zero statements
+                    if re.search(r'\b(no\s+incidents?|nil|zero\s+incidents?|0\s+incidents?)\b', 
+                                 row_lower):
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': 0,
+                            'page': row_info['page'],
+                            'score': cls._score_row(row_text) + 3,  # strong signal
+                        })
+                        continue
+                    
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': value,
+                            'page': row_info['page'],
+                            'score': score,
+                        })
+        
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            return {
+                'normalized_metric': 'SAFETY_INCIDENTS',
+                'value': best['value'],
+                'unit': '',  # count-based, unitless
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Social',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        return None
+    
+    @classmethod
+    def _extract_employee_wellbeing(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract employee wellbeing metric (training hours, turnover rate, etc.).
+        Value must be 0–100 when it's a rate/percentage.
+        For training hours, accept larger values.
+        """
+        candidates = []
+        
+        for pattern in cls.EMPLOYEE_WELLBEING_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.1)
+                    if value is not None and value > 0:
+                        # For rates/percentages, cap at 100
+                        row_lower = row_text.lower()
+                        is_rate = any(w in row_lower for w in ['rate', '%', 'percent', 'ratio'])
+                        if is_rate and value > 100:
+                            continue
+                        
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': value,
+                            'page': row_info['page'],
+                            'score': score,
+                        })
+        
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            row_lower = best['row_text'].lower()
+            is_pct = any(w in row_lower for w in ['rate', '%', 'percent', 'ratio', 'turnover', 'attrition'])
+            unit = '%' if is_pct else ''
+            
+            return {
+                'normalized_metric': 'EMPLOYEE_WELLBEING',
+                'value': best['value'],
+                'unit': unit,
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Social',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_lower else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        return None
+    
+    @classmethod
+    def _extract_data_breaches(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract data breach count.
+        Accept value == 0 (legitimate: no breaches reported).
+        Detect 'no breaches' / 'zero' / 'nil' as value=0.
+        """
+        candidates = []
+        
+        for pattern in cls.DATA_BREACHES_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    row_lower = row_text.lower()
+                    
+                    # Detect explicit zero statements
+                    if re.search(r'\b(no\s+(?:data\s+)?breach|nil|zero\s+breach|0\s+breach)\b',
+                                 row_lower):
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': 0,
+                            'page': row_info['page'],
+                            'score': cls._score_row(row_text) + 3,
+                        })
+                        continue
+                    
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': value,
+                            'page': row_info['page'],
+                            'score': score,
+                        })
+        
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            return {
+                'normalized_metric': 'DATA_BREACHES',
+                'value': best['value'],
+                'unit': '',  # count-based, unitless
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Governance',
+                'confidence': 0.95 if best['value'] == 0 else (
+                    CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY),
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        return None
+    
+    @classmethod
+    def _extract_complaints(cls, rows: List[Dict]) -> Optional[Dict]:
+        """
+        Extract complaint count.
+        Reject rows containing 'per employee' or 'intensity'.
+        """
+        candidates = []
+        
+        for pattern in cls.COMPLAINTS_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                
+                # Additional rejection: per-employee intensity for complaints
+                row_lower = row_text.lower()
+                if 'per employee' in row_lower or 'per 100' in row_lower:
+                    continue
+                
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        score = cls._score_row(row_text)
+                        candidates.append({
+                            'row_text': row_text,
+                            'value': value,
+                            'page': row_info['page'],
+                            'score': score,
+                        })
+        
+        if candidates:
+            best = max(candidates, key=lambda c: c['score'])
+            return {
+                'normalized_metric': 'COMPLAINTS',
+                'value': best['value'],
+                'unit': '',  # count-based, unitless
+                'entity_text': best['row_text'][:100],
+                'context': best['row_text'][:200],
+                'section_type': 'Governance',
+                'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in best['row_text'].lower() else CONFIDENCE_TABLE_ONLY,
+                'validation_status': 'VALID',
+                'validation_issues': [],
+                'source_type': 'table_reconstructed',
+                'page': best['page'],
+            }
+        return None
 
 
 # ============================================================================
@@ -1032,7 +1364,7 @@ class EnhancedTableParser:
     🔥 FIX 45: Debug logging for rejected rows.
     """
     
-    # Comprehensive mapping for row labels → canonical metric (7+4 target metrics)
+    # Comprehensive mapping for row labels → canonical metric (11 target metrics)
     METRIC_SYNONYMS = {
         'SCOPE_1': [
             'scope 1', 'scope1', 'direct emissions', 'scope i', 'scope one',
@@ -1058,29 +1390,25 @@ class EnhancedTableParser:
             'waste generated', 'total waste', 'solid waste', 'hazardous waste',
             'non-hazardous waste', 'waste disposal', 'waste produced'
         ],
-        'ESG_SCORE': [
-            'esg score', 'esg rating', 'sustainability score', 'sustainability rating',
-            'esg index', 'moody\'s score', 's&p global score', 'esg risk rating'
+        'GENDER_DIVERSITY': [
+            'gender diversity', 'women employees', 'female employees', 'women in workforce',
+            'female representation', 'gender ratio', 'workforce diversity'
         ],
-        # 🆕 FIX 48: New metric synonyms (additive)
-        'ENVIRONMENTAL_SCORE': [
-            'environmental score', 'environment score', 'e score',
-            'environmental pillar score', 'environmental rating',
-            'environmental performance score'
+        'SAFETY_INCIDENTS': [
+            'safety incidents', 'lost time injury', 'ltifr', 'fatalities',
+            'recordable incidents', 'occupational injuries', 'workplace accidents'
         ],
-        'SOCIAL_SCORE': [
-            'social score', 's score', 'social pillar score',
-            'social rating', 'social performance score'
+        'EMPLOYEE_WELLBEING': [
+            'employee wellbeing', 'employee well-being', 'training hours',
+            'employee turnover', 'attrition rate', 'employee satisfaction'
         ],
-        'GOVERNANCE_SCORE': [
-            'governance score', 'g score', 'governance pillar score',
-            'governance rating', 'governance performance score',
-            'corporate governance score'
+        'DATA_BREACHES': [
+            'data breaches', 'data breach', 'cyber incidents', 'cybersecurity incidents',
+            'privacy breaches', 'security incidents', 'data leaks'
         ],
-        'CARBON_EMISSIONS': [
-            'total emissions', 'total carbon emissions', 'total ghg emissions',
-            'overall emissions', 'total co2 emissions', 'aggregate emissions',
-            'combined scope emissions', 'total greenhouse gas emissions'
+        'COMPLAINTS': [
+            'complaints', 'grievances', 'whistleblower complaints',
+            'ethics complaints', 'consumer complaints', 'customer complaints'
         ],
     }
     
@@ -2290,12 +2618,8 @@ class ValueExtractor:
 
 class MetricValidator:
     """
-    ✅ FIX 5: ESG_SCORE STRICT VALIDATION
-    NEW RULES for ESG_SCORE:
-    - Value must be between 20-100
-    - Context must contain score keywords: ["score", "rating", "index"]
-    - Reject if either condition fails
-    ✅ FIX 38: ESG_SCORE hard filter (already done, but reinforced)
+    Metric validation layer.
+    Applies range checks, unit compatibility, and keyword validation.
     """
     
     def __init__(self):
@@ -2306,12 +2630,11 @@ class MetricValidator:
             'ENERGY_CONSUMPTION': (0, 100_000_000),
             'WATER_USAGE': (0, 100_000_000),
             'WASTE_GENERATED': (0, 10_000_000),
-            'ESG_SCORE': (0, 100),
-            # 🆕 FIX 48: Validation ranges for new metrics (additive)
-            'ENVIRONMENTAL_SCORE': (0, 100),
-            'SOCIAL_SCORE': (0, 100),
-            'GOVERNANCE_SCORE': (0, 100),
-            'CARBON_EMISSIONS': (0, 50_000_000),
+            'GENDER_DIVERSITY': (0, 100),
+            'SAFETY_INCIDENTS': (0, 100_000),
+            'EMPLOYEE_WELLBEING': (0, 100),
+            'DATA_BREACHES': (0, 100_000),
+            'COMPLAINTS': (0, 1_000_000),
         }
     
     def validate(
@@ -2331,27 +2654,7 @@ class MetricValidator:
         status = "VALID"
         penalty = 1.0
         
-        # ✅ FIX 5 + FIX 38: ESG_SCORE STRICT VALIDATION
-        if metric == 'ESG_SCORE':
-            # Rule 1: Value range 20-100
-            if value < 20 or value > 100:
-                issues.append(f"ESG_SCORE value {value} outside valid range [20, 100]")
-                status = "INVALID"
-                penalty = 0.0
-                return status, issues, penalty
-            
-            # Rule 2: Must have score keyword in context
-            context_lower = context.lower()
-            score_keywords = ['score', 'rating', 'index']
-            has_score_keyword = any(kw in context_lower for kw in score_keywords)
-            
-            if not has_score_keyword:
-                issues.append("ESG_SCORE requires score-related keyword in context")
-                status = "INVALID"
-                penalty = 0.0
-                return status, issues, penalty
-        
-        # Range validation for other metrics
+        # Range validation
         if metric in self.value_ranges:
             min_val, max_val = self.value_ranges[metric]
             
@@ -2475,10 +2778,6 @@ class ConfidenceScorer:
         if not keyword_match:
             base_score *= 0.5
 
-        # ESG_SCORE penalty
-        if metric == 'ESG_SCORE':
-            base_score *= 0.7
-
         # ✅ FIX 39: Apply caps based on source_type
         if source_type == 'paragraph':
             base_score = min(base_score, CONFIDENCE_PARAGRAPH_MAX)
@@ -2498,36 +2797,208 @@ class ConfidenceScorer:
 
 
 # ============================================================================
-# DEDUPLICATION
+# HELPER: Zero-incident context detection
 # ============================================================================
 
-class MetricDeduplicator:
+_ZERO_INCIDENT_RE = re.compile(
+    r'\b(no\s+incidents?|zero\s+(breach|incident|complaint)|nil\s+incident|'
+    r'no\s+data\s+breach|no\s+breach|0\s+incidents?)\b',
+    re.IGNORECASE,
+)
+
+
+def _matches_zero_incidents(text: str) -> bool:
+    """Return True if text explicitly states zero incidents / no breaches."""
+    return bool(_ZERO_INCIDENT_RE.search(text))
+
+
+# ============================================================================
+# METRIC SELECTION & PRIORITY SYSTEM
+# ============================================================================
+
+class MetricSelector:
     """
-    ✅ FIX 16 + FIX 18: Enhanced deduplication.
-    Group by normalized_metric, pick the one with highest confidence.
-    Table override is handled earlier (paragraph values skipped if metric exists in table).
+    Robust metric selection and priority system.
+
+    Design principles:
+      - ALL 11 metrics treated equally — no hardcoded priority advantage
+      - Priority derived DYNAMICALLY from source_type, confidence, validation
+      - Environmental metrics win naturally due to better table structure,
+        NOT due to bias
+
+    Pipeline:
+      1. Apply metric-specific pre-filters (reject invalid candidates)
+      2. Boost confidence based on context signals
+      3. Compute final_score = f(source_priority, confidence, validation)
+      4. Group by normalized_metric, pick best candidate per metric
     """
-    
+
+    # ------------------------------------------------------------------
+    # STEP 2: Final score function
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def compute_final_score(metric: Dict) -> float:
+        """
+        Compute a unified selection score for a metric candidate.
+
+        Score = source_priority * 0.5
+              + confidence      * 0.4
+              + validation_ok   * 0.1
+
+        All metrics use the SAME formula — no metric-specific weighting.
+        Source reliability, extraction confidence, and validation quality
+        determine the winner naturally.
+        """
+        source_weight = SOURCE_PRIORITY.get(metric.get('source_type', ''), 0.5)
+        confidence    = metric.get('confidence', 0.0)
+        valid_bonus   = 1.0 if metric.get('validation_status') == 'VALID' else 0.0
+
+        return (
+            source_weight * 0.5 +
+            confidence    * 0.4 +
+            valid_bonus   * 0.1
+        )
+
+    # ------------------------------------------------------------------
+    # STEP 4: Metric-specific pre-filter adjustments
+    # ------------------------------------------------------------------
+
     @classmethod
-    def deduplicate(cls, metrics: List[Dict]) -> List[Dict]:
-        """Return one best entry per normalized_metric."""
+    def _apply_metric_adjustments(cls, candidates: List[Dict]) -> List[Dict]:
+        """
+        Apply metric-specific validation rules BEFORE scoring.
+
+        These are REJECTION rules, not priority boosts:
+          - GENDER_DIVERSITY: reject if value > 100
+          - SAFETY_INCIDENTS: allow 0; slightly reduce conf for LTIFR
+          - DATA_BREACHES: detect "no incidents" / "zero breaches" → value=0, conf=0.95
+          - COMPLAINTS: reject if row contains "per employee" / "intensity"
+          - EMPLOYEE_WELLBEING: reject if value outside 0–100
+        """
+        filtered = []
+
+        for m in candidates:
+            metric_name = m.get('normalized_metric', '')
+            value       = m.get('value', 0)
+            context     = (m.get('context', '') + ' ' + m.get('entity_text', '')).lower()
+
+            # --- GENDER_DIVERSITY ---
+            if metric_name == 'GENDER_DIVERSITY':
+                if value > 100:
+                    continue  # reject: percentages cannot exceed 100
+
+            # --- SAFETY_INCIDENTS ---
+            elif metric_name == 'SAFETY_INCIDENTS':
+                # Allow value == 0 (valid: no incidents)
+                if 'ltifr' in context:
+                    # LTIFR is an intensity rate, slightly less reliable as an absolute count
+                    m = dict(m)
+                    m['confidence'] = max(0.1, m.get('confidence', 0.5) - 0.05)
+
+            # --- DATA_BREACHES ---
+            elif metric_name == 'DATA_BREACHES':
+                if _matches_zero_incidents(context):
+                    m = dict(m)
+                    m['value'] = 0
+                    m['confidence'] = 0.95
+
+            # --- COMPLAINTS ---
+            elif metric_name == 'COMPLAINTS':
+                if re.search(r'\bper\s+employee\b', context) or \
+                   re.search(r'\bintensity\b', context):
+                    continue  # reject: intensity metric, not raw count
+
+            # --- EMPLOYEE_WELLBEING ---
+            elif metric_name == 'EMPLOYEE_WELLBEING':
+                if value < 0 or value > 100:
+                    continue  # reject: must be percentage/score 0–100
+
+            filtered.append(m)
+
+        return filtered
+
+    # ------------------------------------------------------------------
+    # STEP 5: Context-based confidence boosting
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def _boost_confidence(cls, candidates: List[Dict]) -> List[Dict]:
+        """
+        Adjust confidence upward based on context signals.
+
+        Applies UNIFORMLY to all metrics (no metric-specific bias):
+          - "total" or "overall" in context → +0.05
+          - "no incidents" / "zero" in context → +0.10
+        """
+        boosted = []
+
+        for m in candidates:
+            context = (m.get('context', '') + ' ' + m.get('entity_text', '')).lower()
+            boost   = 0.0
+
+            if 'total' in context or 'overall' in context:
+                boost += 0.05
+
+            if _matches_zero_incidents(context):
+                boost += 0.10
+
+            if boost > 0:
+                m = dict(m)  # copy before mutation
+                m['confidence'] = min(0.99, m.get('confidence', 0.5) + boost)
+
+            boosted.append(m)
+
+        return boosted
+
+    # ------------------------------------------------------------------
+    # STEP 3 + 6 + 7: Fair selection — one winner per metric
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def select_best(cls, metrics: List[Dict]) -> List[Dict]:
+        """
+        Select the single best candidate per normalized_metric.
+
+        Pipeline:
+          1. Apply metric-specific pre-filters (Step 4)
+          2. Boost confidence from context (Step 5)
+          3. Group by normalized_metric
+          4. Score each candidate with compute_final_score (Step 2)
+          5. Pick max-scored candidate per group (Step 3)
+
+        Fairness guarantee (Step 6):
+          ALL metrics pass through the SAME scoring pipeline.
+          Environmental metrics win naturally due to structured table sources
+          (higher source_priority), NOT due to hardcoded bias.
+        """
         if not metrics:
             return []
 
+        # Step 4: Pre-filter
+        metrics = cls._apply_metric_adjustments(metrics)
+
+        # Step 5: Context boost
+        metrics = cls._boost_confidence(metrics)
+
+        # Group by metric name
         groups: Dict[str, List[Dict]] = defaultdict(list)
         for m in metrics:
             groups[m['normalized_metric']].append(m)
 
+        # Step 3: Pick best candidate per metric using final_score
         winners = []
         for metric_name, group in groups.items():
-            winners.append(cls._pick_winner(group))
+            # Score every candidate
+            scored = [(cls.compute_final_score(m), m) for m in group]
+            best_score, best = max(scored, key=lambda x: x[0])
+
+            # Attach the selection score for transparency
+            best = dict(best)
+            best['_selection_score'] = round(best_score, 4)
+            winners.append(best)
 
         return winners
-
-    @classmethod
-    def _pick_winner(cls, group: List[Dict]) -> Dict:
-        """Pick the single best entry (confidence DESC, value DESC)."""
-        return max(group, key=lambda m: (m['confidence'], m['value']))
 
 
 # ============================================================================
@@ -2541,14 +3012,12 @@ class PDFEvaluationPipeline:
     🔥 FIX 40-46: RECOVERY MODE with multi-stage extraction.
     """
     
-    # 🔥 FIX 46 + 🆕 FIX 48: Target metrics — used to check completeness (extended)
+    # Target metrics — used to check completeness (final 11)
     ALL_TARGET_METRICS = {
         'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
         'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
-        'ESG_SCORE',
-        # 🆕 FIX 48: New metrics
-        'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE',
-        'CARBON_EMISSIONS',
+        'GENDER_DIVERSITY', 'SAFETY_INCIDENTS', 'EMPLOYEE_WELLBEING',
+        'DATA_BREACHES', 'COMPLAINTS',
     }
     
     def __init__(
@@ -2586,7 +3055,7 @@ class PDFEvaluationPipeline:
         self.value_extractor  = ValueExtractor()
         self.validator        = MetricValidator()
         self.confidence_scorer = ConfidenceScorer()
-        self.deduplicator     = MetricDeduplicator()
+        self.metric_selector  = MetricSelector()
 
         print("✓ Pipeline v9.0 (RECOVERY MODE) initialized successfully\n")
 
@@ -2799,18 +3268,21 @@ class PDFEvaluationPipeline:
         all_metrics = table_metrics + text_metrics
 
         # =====================================================================
-        # 🆕 STAGE 4: EXTENDED METRIC EXTRACTION (Plugin — FIX 48)
+        # STAGE 4: EXTENDED METRIC EXTRACTION (Plugin)
         # Runs AFTER all existing stages, BEFORE deduplication.
-        # Extracts: ENVIRONMENTAL_SCORE, SOCIAL_SCORE, GOVERNANCE_SCORE,
-        #           CARBON_EMISSIONS (from tables or derived from scopes)
+        # Extracts additional metrics (social, governance) from tables or text.
         # =====================================================================
         from metric_extensions import run_extended_extraction
         extended_metrics = run_extended_extraction(pdf_data, all_metrics)
         all_metrics = all_metrics + extended_metrics
 
-        # Deduplication — one winner per metric
-        results['metrics'] = self.deduplicator.deduplicate(all_metrics)
-        results['metrics'].sort(key=lambda x: x['confidence'], reverse=True)
+        # =====================================================================
+        # METRIC SELECTION — Dynamic scoring + best-candidate selection
+        # Replaces simple deduplication with source-priority-aware selection.
+        # All 11 metrics pass through the SAME scoring pipeline.
+        # =====================================================================
+        results['metrics'] = self.metric_selector.select_best(all_metrics)
+        results['metrics'].sort(key=lambda x: x.get('_selection_score', 0), reverse=True)
         results['discarded'] = all_discarded
 
         # Confidence gate
@@ -2878,7 +3350,6 @@ class PDFEvaluationPipeline:
     def _process_entity(self, entity: Dict, chunk: Dict) -> Tuple[Optional[Dict], Optional[str]]:
         """
         Process a single NER entity through classification, value extraction, validation.
-        Includes ✅ FIX 38: ESG_SCORE hard filter.
         """
         # Extract context
         context = self.value_extractor.extract_context(
@@ -2893,12 +3364,6 @@ class PDFEvaluationPipeline:
         # ✅ FIX 2: EARLY TERMINATION FOR UNKNOWN
         if normalized_metric == "UNKNOWN":
             return None, "unknown_metric_classification"
-
-        # ✅ FIX 38: ESG_SCORE hard filter — explicit label required
-        if normalized_metric == 'ESG_SCORE':
-            entity_lower = entity['text'].lower()
-            if not re.search(r'\b(esg score|esg rating|sustainability score|sustainability rating)\b', entity_lower):
-                return None, "esg_score_not_explicit"
 
         # Locate entity within context
         entity_text_in_context = entity['text']
@@ -2942,7 +3407,7 @@ class PDFEvaluationPipeline:
 
         source_type = 'paragraph'  # text extraction path is always paragraph
 
-        # ✅ FIX 5 + FIX 38: Validate (ESG_SCORE strict; UNKNOWN unit allowed with penalty)
+        # Validate (UNKNOWN unit allowed with penalty)
         validation_status, validation_issues, validation_penalty = self.validator.validate(
             metric=normalized_metric,
             value=canonical_value,

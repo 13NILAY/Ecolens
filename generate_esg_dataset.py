@@ -22,7 +22,7 @@ from datetime import datetime
 # ==================== METRIC DEFINITIONS ====================
 
 METRIC_DEFINITIONS = {
-    # Environmental Metrics
+    # ==================== ENVIRONMENTAL METRICS ====================
     "SCOPE_1": {
         "category": "Environmental",
         "synonyms": [
@@ -96,72 +96,69 @@ METRIC_DEFINITIONS = {
         "value_range": (100, 500000),
         "distribution": "lognormal"
     },
-    "ESG_SCORE": {
-        "category": "Governance",
-        "synonyms": [
-            "ESG score", "sustainability rating", "ESG rating", "overall ESG performance",
-            "ESG assessment score", "sustainability score", "ESG index score",
-            "composite ESG score", "ESG performance rating", "sustainability index",
-            "CSR score", "corporate responsibility rating", "MSCI ESG rating",
-            "Sustainalytics score", "CDP score"
-        ],
-        "units": ["score", "rating", "points", "out of 100", ""],
-        "value_range": (30, 95),
-        "distribution": "beta"
-    },
-    # 🆕 New metrics for extended ESG extraction
-    "ENVIRONMENTAL_SCORE": {
-        "category": "Environmental",
-        "synonyms": [
-            "Environmental score", "environment score", "E score",
-            "environmental pillar score", "environmental rating",
-            "environmental performance score", "E pillar rating",
-            "environmental sub-score", "environment pillar",
-            "environmental component score", "green score"
-        ],
-        "units": ["score", "rating", "points", "out of 100", ""],
-        "value_range": (20, 95),
-        "distribution": "beta"
-    },
-    "SOCIAL_SCORE": {
+    
+    # ==================== SOCIAL METRICS ====================
+    "GENDER_DIVERSITY": {
         "category": "Social",
         "synonyms": [
-            "Social score", "S score", "social pillar score",
-            "social rating", "social performance score", "S pillar rating",
-            "social sub-score", "social component score",
-            "social responsibility score", "community score",
-            "people score"
+            "gender diversity", "female employees percentage", "women workforce ratio",
+            "% women employees", "gender ratio", "women in workforce",
+            "female representation", "gender balance", "women employees",
+            "percentage of women", "female workforce percentage"
         ],
-        "units": ["score", "rating", "points", "out of 100", ""],
-        "value_range": (20, 95),
+        "units": ["%", "percent"],
+        "value_range": (10, 60),
         "distribution": "beta"
     },
-    "GOVERNANCE_SCORE": {
+    "SAFETY_INCIDENTS": {
+        "category": "Social",
+        "synonyms": [
+            "safety incidents", "workplace incidents", "injuries reported",
+            "accident cases", "lost time injuries", "recordable incidents",
+            "workplace accidents", "injury cases", "safety events",
+            "occupational injuries", "LTI count"
+        ],
+        "units": ["count", "incidents", "cases", ""],
+        "value_range": (0, 500),
+        "distribution": "poisson"
+    },
+    "EMPLOYEE_WELLBEING": {
+        "category": "Social",
+        "synonyms": [
+            "employee wellbeing score", "employee satisfaction", "workforce wellbeing",
+            "employee engagement score", "staff satisfaction", "employee wellness score",
+            "workforce satisfaction", "employee happiness index", "staff wellbeing",
+            "employee engagement", "wellbeing index"
+        ],
+        "units": ["%", "score", "points", ""],
+        "value_range": (40, 95),
+        "distribution": "beta"
+    },
+    
+    # ==================== GOVERNANCE METRICS ====================
+    "DATA_BREACHES": {
         "category": "Governance",
         "synonyms": [
-            "Governance score", "G score", "governance pillar score",
-            "governance rating", "governance performance score", "G pillar rating",
-            "governance sub-score", "corporate governance score",
-            "governance component score", "board governance score",
-            "governance quality score"
+            "data breaches", "cybersecurity incidents", "security breaches",
+            "data loss incidents", "privacy incidents", "cyber incidents",
+            "information security breaches", "data security incidents",
+            "breach events", "cyber attacks", "security incidents"
         ],
-        "units": ["score", "rating", "points", "out of 100", ""],
-        "value_range": (20, 95),
-        "distribution": "beta"
+        "units": ["count", "incidents", "cases", ""],
+        "value_range": (0, 50),
+        "distribution": "poisson"
     },
-    "CARBON_EMISSIONS": {
-        "category": "Environmental",
+    "COMPLAINTS": {
+        "category": "Governance",
         "synonyms": [
-            "total carbon emissions", "total emissions", "total GHG emissions",
-            "overall emissions", "aggregate carbon emissions",
-            "total CO2 emissions", "total CO2e emissions",
-            "combined scope emissions", "total greenhouse gas emissions",
-            "carbon footprint", "total carbon footprint",
-            "gross carbon emissions", "absolute emissions"
+            "complaints received", "grievances reported", "customer complaints",
+            "compliance complaints", "ethics complaints", "stakeholder complaints",
+            "formal complaints", "grievance cases", "complaint cases",
+            "reported grievances", "complaint incidents"
         ],
-        "units": ["tonnes CO2e", "tCO2e", "million tonnes CO2e", "Mt CO2e", "kg CO2e", "mtCO2e"],
-        "value_range": (50000, 15000000),
-        "distribution": "lognormal"
+        "units": ["count", "cases", ""],
+        "value_range": (0, 500),
+        "distribution": "poisson"
     },
 }
 
@@ -502,20 +499,46 @@ def generate_distractor() -> str:
 def select_metrics_for_sample(num_metrics: int) -> List[str]:
     """Select coherent metric combinations"""
     
-    # Define metric groups that often appear together
+    # Define metric groups that often appear together (ONLY 11 APPROVED METRICS)
     metric_groups = [
+        # Environmental-focused groups
         ["SCOPE_1", "SCOPE_2", "SCOPE_3"],
         ["ENERGY_CONSUMPTION", "WATER_USAGE", "WASTE_GENERATED"],
         ["SCOPE_1", "SCOPE_2", "ENERGY_CONSUMPTION"],
-        ["WASTE_GENERATED", "WATER_USAGE", "ESG_SCORE"],
-        ["SCOPE_1", "SCOPE_2", "SCOPE_3", "ESG_SCORE"],
-        # 🆕 New metric group combinations
-        ["ESG_SCORE", "ENVIRONMENTAL_SCORE", "SOCIAL_SCORE", "GOVERNANCE_SCORE"],
-        ["ENVIRONMENTAL_SCORE", "SOCIAL_SCORE", "GOVERNANCE_SCORE"],
-        ["SCOPE_1", "SCOPE_2", "SCOPE_3", "CARBON_EMISSIONS"],
-        ["CARBON_EMISSIONS", "ENERGY_CONSUMPTION", "WATER_USAGE"],
-        ["ESG_SCORE", "ENVIRONMENTAL_SCORE", "CARBON_EMISSIONS"],
-        ["SOCIAL_SCORE", "GOVERNANCE_SCORE", "ESG_SCORE"],
+        ["SCOPE_2", "SCOPE_3", "WATER_USAGE"],
+        ["SCOPE_1", "ENERGY_CONSUMPTION", "WASTE_GENERATED"],
+        
+        # Social-focused groups
+        ["GENDER_DIVERSITY", "SAFETY_INCIDENTS", "EMPLOYEE_WELLBEING"],
+        ["SAFETY_INCIDENTS", "EMPLOYEE_WELLBEING"],
+        ["GENDER_DIVERSITY", "EMPLOYEE_WELLBEING"],
+        
+        # Governance-focused groups
+        ["DATA_BREACHES", "COMPLAINTS"],
+        
+        # Cross-category groups (E+S)
+        ["SCOPE_1", "ENERGY_CONSUMPTION", "GENDER_DIVERSITY"],
+        ["WATER_USAGE", "WASTE_GENERATED", "SAFETY_INCIDENTS"],
+        ["SCOPE_2", "EMPLOYEE_WELLBEING"],
+        ["ENERGY_CONSUMPTION", "SAFETY_INCIDENTS"],
+        
+        # Cross-category groups (E+G)
+        ["SCOPE_1", "SCOPE_2", "COMPLAINTS"],
+        ["SCOPE_2", "SCOPE_3", "COMPLAINTS"],
+        ["ENERGY_CONSUMPTION", "WATER_USAGE", "DATA_BREACHES"],
+        ["WASTE_GENERATED", "DATA_BREACHES"],
+        
+        # Cross-category groups (S+G)
+        ["GENDER_DIVERSITY", "SAFETY_INCIDENTS", "COMPLAINTS"],
+        ["EMPLOYEE_WELLBEING", "DATA_BREACHES"],
+        ["SAFETY_INCIDENTS", "DATA_BREACHES", "COMPLAINTS"],
+        
+        # Cross-category groups (E+S+G)
+        ["SCOPE_1", "GENDER_DIVERSITY", "COMPLAINTS"],
+        ["ENERGY_CONSUMPTION", "EMPLOYEE_WELLBEING", "DATA_BREACHES"],
+        ["WATER_USAGE", "SAFETY_INCIDENTS", "COMPLAINTS"],
+        ["WASTE_GENERATED", "GENDER_DIVERSITY", "DATA_BREACHES"],
+        ["SCOPE_3", "SAFETY_INCIDENTS", "COMPLAINTS"],
     ]
     
     # 70% chance of using a coherent group, 30% random mix

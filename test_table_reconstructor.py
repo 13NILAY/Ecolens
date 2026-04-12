@@ -107,6 +107,55 @@ class TableReconstructor:
         re.compile(r'rainwater', re.I),
     ]
     
+    # --- Social / Governance metric patterns ---
+    
+    GENDER_DIVERSITY_PATTERNS = [
+        re.compile(r'women\s+(?:in\s+)?(?:workforce|employees|total)', re.I),
+        re.compile(r'female\s+(?:employees|representation|workforce|workers)', re.I),
+        re.compile(r'gender\s+diversity', re.I),
+        re.compile(r'(?:percentage|%|proportion)\s+(?:of\s+)?(?:women|female)', re.I),
+        re.compile(r'workforce\s+diversity', re.I),
+        re.compile(r'women\s+employees', re.I),
+    ]
+    
+    SAFETY_INCIDENTS_PATTERNS = [
+        re.compile(r'(?:total|number\s+of)\s+(?:safety\s+)?incidents?', re.I),
+        re.compile(r'(?:total|number\s+of)\s+(?:recordable\s+)?injur(?:y|ies)', re.I),
+        re.compile(r'lost\s+time\s+injur(?:y|ies)', re.I),
+        re.compile(r'\bltifr\b', re.I),
+        re.compile(r'fatalit(?:y|ies)', re.I),
+        re.compile(r'occupational\s+(?:health.*)?incident', re.I),
+        re.compile(r'workplace\s+accident', re.I),
+        re.compile(r'reportable\s+incident', re.I),
+    ]
+    
+    EMPLOYEE_WELLBEING_PATTERNS = [
+        re.compile(r'(?:total|average)\s+training\s+hours', re.I),
+        re.compile(r'employee\s+(?:turnover|attrition)\s+(?:rate)?', re.I),
+        re.compile(r'employee\s+well.?being', re.I),
+        re.compile(r'employee\s+satisfaction', re.I),
+        re.compile(r'attrition\s+rate', re.I),
+    ]
+    
+    DATA_BREACHES_PATTERNS = [
+        re.compile(r'(?:number\s+of\s+)?data\s+breach', re.I),
+        re.compile(r'cyber\s*(?:security)?\s*incident', re.I),
+        re.compile(r'(?:number\s+of\s+)?(?:information|data)\s+security\s+incident', re.I),
+        re.compile(r'privacy\s+breach', re.I),
+        re.compile(r'no\s+(?:data\s+)?breach', re.I),
+        re.compile(r'(?:zero|nil|0)\s+(?:data\s+)?breach', re.I),
+    ]
+    
+    COMPLAINTS_PATTERNS = [
+        re.compile(r'(?:total|number\s+of)\s+complaints?\s+(?:received|filed|reported)?', re.I),
+        re.compile(r'(?:total|number\s+of)\s+grievance', re.I),
+        re.compile(r'consumer\s+complaints?', re.I),
+        re.compile(r'customer\s+complaints?', re.I),
+        re.compile(r'whistleblower\s+complaints?', re.I),
+        re.compile(r'stakeholder\s+complaints?', re.I),
+        re.compile(r'complaints?\s+(?:under|related\s+to)', re.I),
+    ]
+    
     REJECT_PATTERNS = [
         re.compile(r'\bper\s+(employee|fte|unit|tonne|kwh|mwh|revenue|capita)', re.I),
         re.compile(r'\bintensity\b', re.I),
@@ -155,6 +204,33 @@ class TableReconstructor:
         if water:
             metrics['WATER_USAGE'] = water
             print(f"    ✅ [TR] WATER_USAGE: {water['value']} {water['unit']} (page {water['page']})")
+        
+        # --- Social / Governance metrics ---
+        
+        gender = cls._extract_gender_diversity(all_rows)
+        if gender:
+            metrics['GENDER_DIVERSITY'] = gender
+            print(f"    ✅ [TR] GENDER_DIVERSITY: {gender['value']} {gender['unit']} (page {gender['page']})")
+        
+        safety = cls._extract_safety_incidents(all_rows)
+        if safety:
+            metrics['SAFETY_INCIDENTS'] = safety
+            print(f"    ✅ [TR] SAFETY_INCIDENTS: {safety['value']} {safety['unit']} (page {safety['page']})")
+        
+        wellbeing = cls._extract_employee_wellbeing(all_rows)
+        if wellbeing:
+            metrics['EMPLOYEE_WELLBEING'] = wellbeing
+            print(f"    ✅ [TR] EMPLOYEE_WELLBEING: {wellbeing['value']} {wellbeing['unit']} (page {wellbeing['page']})")
+        
+        breaches = cls._extract_data_breaches(all_rows)
+        if breaches:
+            metrics['DATA_BREACHES'] = breaches
+            print(f"    ✅ [TR] DATA_BREACHES: {breaches['value']} {breaches['unit']} (page {breaches['page']})")
+        
+        complaints = cls._extract_complaints(all_rows)
+        if complaints:
+            metrics['COMPLAINTS'] = complaints
+            print(f"    ✅ [TR] COMPLAINTS: {complaints['value']} {complaints['unit']} (page {complaints['page']})")
         
         return list(metrics.values())
     
@@ -439,6 +515,180 @@ class TableReconstructor:
         if 'kl' in t or 'kilolitre' in t or 'kiloliter' in t: return 'KL'
         if 'm3' in t or 'm³' in t or 'cubic' in t: return 'KL'
         return 'KL'
+    
+    # ------------------------------------------------------------------
+    # SOCIAL / GOVERNANCE METRIC EXTRACTION
+    # ------------------------------------------------------------------
+    
+    @classmethod
+    def _extract_gender_diversity(cls, rows):
+        """Extract gender diversity (percentage of women in workforce). Value: 0–100."""
+        for pattern in cls.GENDER_DIVERSITY_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.1)
+                    if value is not None and 0 < value <= 100:
+                        return {
+                            'normalized_metric': 'GENDER_DIVERSITY',
+                            'value': value,
+                            'unit': '%',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Social',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_text.lower() else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_safety_incidents(cls, rows):
+        """Extract safety incidents count. Accept value == 0."""
+        for pattern in cls.SAFETY_INCIDENTS_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    row_lower = row_text.lower()
+                    # Detect explicit zero
+                    if re.search(r'\b(no\s+incidents?|nil|zero\s+incidents?|0\s+incidents?)\b', row_lower):
+                        return {
+                            'normalized_metric': 'SAFETY_INCIDENTS',
+                            'value': 0,
+                            'unit': '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Social',
+                            'confidence': 0.95,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        return {
+                            'normalized_metric': 'SAFETY_INCIDENTS',
+                            'value': value,
+                            'unit': '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Social',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_lower else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_employee_wellbeing(cls, rows):
+        """Extract employee wellbeing (turnover rate, training hours, etc.)."""
+        for pattern in cls.EMPLOYEE_WELLBEING_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.1)
+                    if value is not None and value > 0:
+                        row_lower = row_text.lower()
+                        is_rate = any(w in row_lower for w in ['rate', '%', 'percent', 'ratio'])
+                        if is_rate and value > 100:
+                            continue
+                        is_pct = any(w in row_lower for w in ['rate', '%', 'percent', 'ratio', 'turnover', 'attrition'])
+                        return {
+                            'normalized_metric': 'EMPLOYEE_WELLBEING',
+                            'value': value,
+                            'unit': '%' if is_pct else '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Social',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_lower else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_data_breaches(cls, rows):
+        """Extract data breach count. Accept value == 0."""
+        for pattern in cls.DATA_BREACHES_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                if pattern.search(row_text):
+                    row_lower = row_text.lower()
+                    # Detect explicit zero
+                    if re.search(r'\b(no\s+(?:data\s+)?breach|nil|zero\s+breach|0\s+breach)\b', row_lower):
+                        return {
+                            'normalized_metric': 'DATA_BREACHES',
+                            'value': 0,
+                            'unit': '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Governance',
+                            'confidence': 0.95,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        return {
+                            'normalized_metric': 'DATA_BREACHES',
+                            'value': value,
+                            'unit': '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Governance',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_lower else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
+    
+    @classmethod
+    def _extract_complaints(cls, rows):
+        """Extract complaint count. Reject 'per employee' / 'intensity'."""
+        for pattern in cls.COMPLAINTS_PATTERNS:
+            for row_info in rows:
+                row_text = row_info['text']
+                if cls._is_rejected(row_text):
+                    continue
+                row_lower = row_text.lower()
+                if 'per employee' in row_lower or 'per 100' in row_lower:
+                    continue
+                if pattern.search(row_text):
+                    value = cls._extract_first_valid_number(row_text, min_value=0.0)
+                    if value is not None and value >= 0:
+                        return {
+                            'normalized_metric': 'COMPLAINTS',
+                            'value': value,
+                            'unit': '',
+                            'entity_text': row_text[:100],
+                            'context': row_text[:200],
+                            'section_type': 'Governance',
+                            'confidence': CONFIDENCE_TABLE_TOTAL if 'total' in row_lower else CONFIDENCE_TABLE_ONLY,
+                            'validation_status': 'VALID',
+                            'validation_issues': [],
+                            'source_type': 'table_reconstructed',
+                            'page': row_info['page'],
+                        }
+        return None
 
 
 # ============================================================================
@@ -477,12 +727,14 @@ if __name__ == "__main__":
             'page': m['page'],
         }
     
-    # Target completeness check
+    # Target completeness check (all 11 target metrics)
     target = {'SCOPE_1', 'SCOPE_2', 'SCOPE_3', 'ENERGY_CONSUMPTION', 
-              'WATER_USAGE', 'WASTE_GENERATED', 'ESG_SCORE'}
+              'WATER_USAGE', 'WASTE_GENERATED', 'GENDER_DIVERSITY',
+              'SAFETY_INCIDENTS', 'EMPLOYEE_WELLBEING', 'DATA_BREACHES',
+              'COMPLAINTS'}
     found = set(output.keys())
     missing = target - found
-    print(f"\n  Completeness: {len(found)}/7 target metrics")
+    print(f"\n  Completeness: {len(found & target)}/11 target metrics")
     if missing:
         print(f"  ⚠ Missing: {missing}")
     else:

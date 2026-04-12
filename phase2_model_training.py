@@ -1,6 +1,6 @@
 """
-PHASE 2: MODEL TRAINING (UPDATED ARCHITECTURE — 11 METRICS)
-============================================================
+PHASE 2: MODEL TRAINING (UPDATED ARCHITECTURE — 11 RAW METRICS)
+================================================================
 
 Trains models for the complete 11-layer architecture with 11 target metrics:
 
@@ -13,10 +13,11 @@ Trains models for the complete 11-layer architecture with 11 target metrics:
 10. Confidence Scoring (Ensemble)
 11. Validation (Rule-based + ML)
 
-Target Metrics (11):
-  SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION, WATER_USAGE,
-  WASTE_GENERATED, ESG_SCORE, ENVIRONMENTAL_SCORE, SOCIAL_SCORE,
-  GOVERNANCE_SCORE, CARBON_EMISSIONS
+Target Metrics (11 RAW METRICS ONLY):
+  Environmental (6): SCOPE_1, SCOPE_2, SCOPE_3, ENERGY_CONSUMPTION, 
+                     WATER_USAGE, WASTE_GENERATED
+  Social (3):        GENDER_DIVERSITY, SAFETY_INCIDENTS, EMPLOYEE_WELLBEING
+  Governance (2):    DATA_BREACHES, COMPLAINTS
 
 Dependencies:
 pip install transformers torch scikit-learn seqeval
@@ -41,14 +42,15 @@ from pathlib import Path
 import re
 
 
-# TARGET METRICS — all 11 metrics used across the pipeline
+# TARGET METRICS — all 11 RAW metrics used across the pipeline
 TARGET_METRICS = {
+    # Environmental (6)
     'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
     'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
-    'ESG_SCORE',
-    # Extended metrics (v9.0+)
-    'ENVIRONMENTAL_SCORE', 'SOCIAL_SCORE', 'GOVERNANCE_SCORE',
-    'CARBON_EMISSIONS',
+    # Social (3)
+    'GENDER_DIVERSITY', 'SAFETY_INCIDENTS', 'EMPLOYEE_WELLBEING',
+    # Governance (2)
+    'DATA_BREACHES', 'COMPLAINTS',
 }
 
 

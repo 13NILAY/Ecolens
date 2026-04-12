@@ -1,12 +1,13 @@
 """
-ESG METRIC EXTENSIONS — Plugin Module for 4 New Metrics
-========================================================
+ESG METRIC EXTENSIONS — Plugin Module for Social/Governance Metrics
+====================================================================
 
-Adds extraction support for:
-  - ENVIRONMENTAL_SCORE
-  - SOCIAL_SCORE
-  - GOVERNANCE_SCORE
-  - CARBON_EMISSIONS
+Adds extraction support for the 5 non-environmental target metrics:
+  - GENDER_DIVERSITY
+  - SAFETY_INCIDENTS
+  - EMPLOYEE_WELLBEING
+  - DATA_BREACHES
+  - COMPLAINTS
 
 This module is designed as a NON-INTRUSIVE plugin:
   - No existing extraction logic is modified
@@ -27,67 +28,61 @@ from typing import List, Dict, Optional, Set
 # ============================================================================
 
 NEW_METRICS: Set[str] = {
-    'ENVIRONMENTAL_SCORE',
-    'SOCIAL_SCORE',
-    'GOVERNANCE_SCORE',
-    'CARBON_EMISSIONS',
-}
-
-SCORE_METRICS: Set[str] = {
-    'ENVIRONMENTAL_SCORE',
-    'SOCIAL_SCORE',
-    'GOVERNANCE_SCORE',
+    'GENDER_DIVERSITY',
+    'SAFETY_INCIDENTS',
+    'EMPLOYEE_WELLBEING',
+    'DATA_BREACHES',
+    'COMPLAINTS',
 }
 
 
 # ============================================================================
-# PATTERNS FOR SCORE EXTRACTION
+# PATTERNS FOR METRIC EXTRACTION
 # ============================================================================
 
-SCORE_PATTERNS: Dict[str, List[re.Pattern]] = {
-    'ENVIRONMENTAL_SCORE': [
-        re.compile(r'environmental\s+score', re.I),
-        re.compile(r'environment\s+score', re.I),
-        re.compile(r'\bE\s+score\b', re.I),
-        re.compile(r'environmental\s+pillar\s+score', re.I),
-        re.compile(r'environmental\s+rating', re.I),
-        re.compile(r'environment\s+rating', re.I),
-        re.compile(r'environmental\s+performance\s+score', re.I),
+METRIC_PATTERNS: Dict[str, List[re.Pattern]] = {
+    'GENDER_DIVERSITY': [
+        re.compile(r'gender\s+diversity', re.I),
+        re.compile(r'women\s+(?:in\s+)?(?:workforce|employees)', re.I),
+        re.compile(r'female\s+(?:employees|representation|workforce)', re.I),
+        re.compile(r'women\s+employees', re.I),
+        re.compile(r'workforce\s+diversity', re.I),
+        re.compile(r'gender\s+ratio', re.I),
     ],
-    'SOCIAL_SCORE': [
-        re.compile(r'social\s+score', re.I),
-        re.compile(r'\bS\s+score\b', re.I),
-        re.compile(r'social\s+pillar\s+score', re.I),
-        re.compile(r'social\s+rating', re.I),
-        re.compile(r'social\s+performance\s+score', re.I),
+    'SAFETY_INCIDENTS': [
+        re.compile(r'safety\s+incidents?', re.I),
+        re.compile(r'lost\s+time\s+injur', re.I),
+        re.compile(r'\bltifr\b', re.I),
+        re.compile(r'fatalit(?:y|ies)', re.I),
+        re.compile(r'recordable\s+incidents?', re.I),
+        re.compile(r'occupational\s+injur', re.I),
+        re.compile(r'workplace\s+accidents?', re.I),
+        re.compile(r'injury\s+(?:rate|frequency)', re.I),
     ],
-    'GOVERNANCE_SCORE': [
-        re.compile(r'governance\s+score', re.I),
-        re.compile(r'\bG\s+score\b', re.I),
-        re.compile(r'governance\s+pillar\s+score', re.I),
-        re.compile(r'governance\s+rating', re.I),
-        re.compile(r'governance\s+performance\s+score', re.I),
-        re.compile(r'corporate\s+governance\s+score', re.I),
+    'EMPLOYEE_WELLBEING': [
+        re.compile(r'employee\s+well.?being', re.I),
+        re.compile(r'training\s+hours', re.I),
+        re.compile(r'employee\s+turnover', re.I),
+        re.compile(r'attrition\s+rate', re.I),
+        re.compile(r'employee\s+satisfaction', re.I),
+    ],
+    'DATA_BREACHES': [
+        re.compile(r'data\s+breach', re.I),
+        re.compile(r'cyber\s+(?:security\s+)?incident', re.I),
+        re.compile(r'privacy\s+breach', re.I),
+        re.compile(r'security\s+incident', re.I),
+        re.compile(r'data\s+leak', re.I),
+    ],
+    'COMPLAINTS': [
+        re.compile(r'complaints?\s+(?:received|filed|reported)', re.I),
+        re.compile(r'grievance', re.I),
+        re.compile(r'whistleblower\s+complaint', re.I),
+        re.compile(r'ethics\s+(?:complaint|violation)', re.I),
+        re.compile(r'consumer\s+complaints?', re.I),
+        re.compile(r'customer\s+complaints?', re.I),
+        re.compile(r'number\s+of\s+complaints?', re.I),
     ],
 }
-
-
-# ============================================================================
-# PATTERNS FOR CARBON EMISSIONS EXTRACTION
-# ============================================================================
-
-CARBON_PATTERNS: List[re.Pattern] = [
-    re.compile(r'total\s+(?:carbon\s+)?emissions', re.I),
-    re.compile(r'total\s+ghg\s+emissions', re.I),
-    re.compile(r'total\s+greenhouse\s+gas\s+emissions', re.I),
-    re.compile(r'overall\s+(?:carbon\s+)?emissions', re.I),
-    re.compile(r'overall\s+ghg\s+emissions', re.I),
-    re.compile(r'total\s+co2\s+emissions', re.I),
-    re.compile(r'total\s+co2e\s+emissions', re.I),
-    re.compile(r'aggregate\s+(?:carbon\s+)?emissions', re.I),
-    re.compile(r'combined\s+scope\s+emissions', re.I),
-    re.compile(r'total\s+scope\s+1.*2.*3\s+emissions', re.I),
-]
 
 
 # ============================================================================
@@ -114,7 +109,7 @@ def _is_rejected(text: str) -> bool:
     return False
 
 
-def _extract_first_valid_number(text: str, min_value: float = 1.0) -> Optional[float]:
+def _extract_first_valid_number(text: str, min_value: float = 0.0) -> Optional[float]:
     """
     Extract the FIRST valid number from text.
     Skip noise values (page numbers, years, IDs).
@@ -138,46 +133,29 @@ def _extract_first_valid_number(text: str, min_value: float = 1.0) -> Optional[f
     return None
 
 
-def _detect_emission_unit(text: str) -> str:
-    """Detect emission unit from row text."""
-    text_lower = text.lower()
-    if 'mtco2' in text_lower or 'mt co2' in text_lower:
-        return 'MtCO2e'
-    if 'ktco2' in text_lower:
-        return 'ktCO2e'
-    if 'tco2' in text_lower or 'tonnes co2' in text_lower or 'metric tonnes' in text_lower:
-        return 'tCO2e'
-    if 'co2' in text_lower or 'carbon' in text_lower or 'ghg' in text_lower:
-        return 'tCO2e'
-    if 'tonnes' in text_lower or 'metric ton' in text_lower:
-        return 'tCO2e'
-    return 'tCO2e'  # default for emissions
-
-
 # ============================================================================
-# SCORE EXTRACTION — NEW HELPER
+# METRIC EXTRACTION — MAIN HELPER
 # ============================================================================
 
-def extract_scores_from_tables(all_rows: List[Dict]) -> List[Dict]:
+def extract_metrics_from_tables(all_rows: List[Dict]) -> List[Dict]:
     """
-    Extract Environmental, Social, and Governance scores from table rows.
+    Extract social/governance metrics from table rows.
 
     Rules:
-      - Detect rows containing score-related patterns
+      - Detect rows containing metric-related patterns
       - Extract FIRST valid numeric value
-      - Value must be 0–100 (score range)
+      - Apply metric-specific validation
       - Ignore intensity/target rows
-      - Unit is empty (scores are unitless)
 
     Args:
         all_rows: List of dicts with 'text' and 'page' keys (normalized table rows)
 
     Returns:
-        List of metric dicts for found scores
+        List of metric dicts for found metrics
     """
     results = []
 
-    for metric_name, patterns in SCORE_PATTERNS.items():
+    for metric_name, patterns in METRIC_PATTERNS.items():
         found = False
         for pattern in patterns:
             if found:
@@ -189,17 +167,19 @@ def extract_scores_from_tables(all_rows: List[Dict]) -> List[Dict]:
                     continue
 
                 if pattern.search(row_text):
-                    value = _extract_first_valid_number(row_text, min_value=0.1)
+                    value = _extract_first_valid_number(row_text, min_value=0.0)
 
-                    if value is not None and 0 <= value <= 100:
+                    if value is not None and _validate_metric_value(metric_name, value):
                         # Determine confidence
                         has_total = 'total' in row_text.lower() or 'overall' in row_text.lower()
-                        confidence = 0.90 if has_total else 0.85
+                        confidence = 0.90 if has_total else 0.80
+
+                        unit = _get_unit_for_metric(metric_name)
 
                         results.append({
                             'normalized_metric': metric_name,
                             'value': value,
-                            'unit': '',  # scores are unitless
+                            'unit': unit,
                             'entity_text': row_text[:100],
                             'context': row_text[:200],
                             'section_type': _get_section_type(metric_name),
@@ -209,7 +189,7 @@ def extract_scores_from_tables(all_rows: List[Dict]) -> List[Dict]:
                             'source_type': 'table_reconstructed',
                             'page': row_info['page'],
                         })
-                        print(f"    ✅ [EXT] {metric_name}: {value} "
+                        print(f"    ✅ [EXT] {metric_name}: {value} {unit} "
                               f"(page {row_info['page']})")
                         found = True
                         break
@@ -218,141 +198,27 @@ def extract_scores_from_tables(all_rows: List[Dict]) -> List[Dict]:
 
 
 # ============================================================================
-# CARBON EMISSIONS EXTRACTION — NEW HELPER
-# ============================================================================
-
-def extract_carbon_from_tables(all_rows: List[Dict]) -> Optional[Dict]:
-    """
-    Extract total carbon emissions from table rows.
-
-    Rules:
-      - Detect rows with "total emissions", "total carbon emissions",
-        "total ghg emissions", "overall emissions"
-      - Extract first valid numeric value >= 100
-      - Assign unit tCO2e (default if missing)
-      - Ignore intensity/target rows
-
-    Args:
-        all_rows: List of dicts with 'text' and 'page' keys
-
-    Returns:
-        Metric dict if found, else None
-    """
-    for pattern in CARBON_PATTERNS:
-        for row_info in all_rows:
-            row_text = row_info['text']
-
-            if _is_rejected(row_text):
-                continue
-
-            # Avoid matching individual scope rows
-            row_lower = row_text.lower()
-            if re.search(r'scope\s*[123]\b', row_lower) and 'total' not in row_lower:
-                continue
-
-            if pattern.search(row_text):
-                value = _extract_first_valid_number(row_text, min_value=100)
-
-                if value is not None and value >= 100:
-                    unit = _detect_emission_unit(row_text)
-                    has_total = 'total' in row_lower or 'overall' in row_lower
-                    confidence = 0.90 if has_total else 0.70
-
-                    result = {
-                        'normalized_metric': 'CARBON_EMISSIONS',
-                        'value': value,
-                        'unit': unit,
-                        'entity_text': row_text[:100],
-                        'context': row_text[:200],
-                        'section_type': 'Environmental',
-                        'confidence': confidence,
-                        'validation_status': 'VALID',
-                        'validation_issues': [],
-                        'source_type': 'table_reconstructed',
-                        'page': row_info['page'],
-                    }
-                    print(f"    ✅ [EXT] CARBON_EMISSIONS: {value} {unit} "
-                          f"(page {row_info['page']})")
-                    return result
-
-    return None
-
-
-# ============================================================================
-# DERIVED CARBON EMISSIONS (Scope 1 + 2 + 3)
-# ============================================================================
-
-def derive_carbon_emissions(existing_metrics: List[Dict]) -> Optional[Dict]:
-    """
-    Compute Carbon Emissions = Scope 1 + Scope 2 + Scope 3.
-
-    Only runs if:
-      - CARBON_EMISSIONS is NOT already found
-      - All three scopes (SCOPE_1, SCOPE_2, SCOPE_3) exist
-
-    Args:
-        existing_metrics: List of all metric dicts found so far
-
-    Returns:
-        Derived CARBON_EMISSIONS metric dict, or None
-    """
-    # Check if carbon already exists
-    metric_names = {m['normalized_metric'] for m in existing_metrics}
-    if 'CARBON_EMISSIONS' in metric_names:
-        return None
-
-    # Collect scope values
-    scope_values = {}
-    scope_units = {}
-    for m in existing_metrics:
-        if m['normalized_metric'] in ('SCOPE_1', 'SCOPE_2', 'SCOPE_3'):
-            scope_values[m['normalized_metric']] = m['value']
-            scope_units[m['normalized_metric']] = m.get('unit', 'tCO2e')
-
-    # Need all three
-    if len(scope_values) < 3:
-        return None
-
-    total = sum(scope_values.values())
-
-    # Use the most common unit among scopes (default tCO2e)
-    unit_counts = {}
-    for u in scope_units.values():
-        unit_counts[u] = unit_counts.get(u, 0) + 1
-    unit = max(unit_counts, key=unit_counts.get) if unit_counts else 'tCO2e'
-
-    result = {
-        'normalized_metric': 'CARBON_EMISSIONS',
-        'value': round(total, 2),
-        'unit': unit,
-        'entity_text': f"Derived: Scope1({scope_values['SCOPE_1']}) + "
-                       f"Scope2({scope_values['SCOPE_2']}) + "
-                       f"Scope3({scope_values['SCOPE_3']})",
-        'context': 'Computed as sum of Scope 1 + Scope 2 + Scope 3 emissions',
-        'section_type': 'Environmental',
-        'confidence': 0.85,
-        'validation_status': 'VALID',
-        'validation_issues': ['derived_from_scopes'],
-        'source_type': 'derived',
-        'page': 0,
-    }
-
-    print(f"    ✅ [EXT] CARBON_EMISSIONS (derived): {total} {unit} "
-          f"(Scope1 + Scope2 + Scope3)")
-    return result
-
-
-# ============================================================================
 # VALIDATION FOR NEW METRICS
 # ============================================================================
+
+def _validate_metric_value(metric_name: str, value: float) -> bool:
+    """Validate a metric value based on expected ranges."""
+    ranges = {
+        'GENDER_DIVERSITY': (0, 100),       # percentage
+        'SAFETY_INCIDENTS': (0, 100_000),   # count
+        'EMPLOYEE_WELLBEING': (0, 100),     # percentage or score
+        'DATA_BREACHES': (0, 100_000),      # count
+        'COMPLAINTS': (0, 1_000_000),       # count
+    }
+    if metric_name in ranges:
+        min_val, max_val = ranges[metric_name]
+        return min_val <= value <= max_val
+    return True
+
 
 def validate_new_metric(metric: Dict) -> bool:
     """
     Validate a new metric result.
-
-    Rules:
-      - Score metrics: value must be 0–100
-      - Carbon emissions: must have valid emission unit
 
     Args:
         metric: Metric dict to validate
@@ -362,49 +228,40 @@ def validate_new_metric(metric: Dict) -> bool:
     """
     name = metric['normalized_metric']
     value = metric['value']
-    unit = metric.get('unit', '')
 
-    # Score validation: 0–100
-    if name in SCORE_METRICS:
-        if value < 0 or value > 100:
-            print(f"    ❌ [EXT-VALIDATE] {name}: value {value} outside 0–100 range")
-            metric['validation_status'] = 'INVALID'
-            metric['validation_issues'].append(f"Score value {value} outside range [0, 100]")
-            return False
-        return True
-
-    # Carbon emissions validation
-    if name == 'CARBON_EMISSIONS':
-        valid_carbon_units = {
-            'tCO2e', 'Mt CO2e', 'MtCO2e', 'ktCO2e', 'tCO2',
-            'tonnes CO2', 'tonnes', 't', 'MT'
-        }
-        if unit and unit not in valid_carbon_units:
-            print(f"    ❌ [EXT-VALIDATE] CARBON_EMISSIONS: invalid unit '{unit}'")
-            metric['validation_status'] = 'INVALID'
-            metric['validation_issues'].append(f"Invalid unit '{unit}' for CARBON_EMISSIONS")
-            return False
-        if value < 100:
-            print(f"    ❌ [EXT-VALIDATE] CARBON_EMISSIONS: value {value} too small")
-            metric['validation_status'] = 'INVALID'
-            metric['validation_issues'].append(f"Carbon value {value} below minimum 100")
-            return False
-        return True
+    if not _validate_metric_value(name, value):
+        print(f"    ❌ [EXT-VALIDATE] {name}: value {value} outside valid range")
+        metric['validation_status'] = 'INVALID'
+        metric['validation_issues'].append(f"Value {value} outside valid range for {name}")
+        return False
 
     return True
 
 
 # ============================================================================
-# HELPER: Section type for scores
+# HELPER: Unit and section type for metrics
 # ============================================================================
+
+def _get_unit_for_metric(metric_name: str) -> str:
+    """Return the expected unit for a metric."""
+    unit_map = {
+        'GENDER_DIVERSITY': '%',
+        'SAFETY_INCIDENTS': '',    # count-based
+        'EMPLOYEE_WELLBEING': '%',
+        'DATA_BREACHES': '',       # count-based
+        'COMPLAINTS': '',          # count-based
+    }
+    return unit_map.get(metric_name, '')
+
 
 def _get_section_type(metric_name: str) -> str:
     """Return the ESG section type for a metric."""
     section_map = {
-        'ENVIRONMENTAL_SCORE': 'Environmental',
-        'SOCIAL_SCORE': 'Social',
-        'GOVERNANCE_SCORE': 'Governance',
-        'CARBON_EMISSIONS': 'Environmental',
+        'GENDER_DIVERSITY': 'Social',
+        'SAFETY_INCIDENTS': 'Social',
+        'EMPLOYEE_WELLBEING': 'Social',
+        'DATA_BREACHES': 'Governance',
+        'COMPLAINTS': 'Governance',
     }
     return section_map.get(metric_name, 'Unknown')
 
@@ -461,11 +318,9 @@ def run_extended_extraction(pdf_data: Dict, existing_metrics: List[Dict]) -> Lis
 
     Pipeline:
       1. Collect normalized rows from PDF data
-      2. Extract scores (Environmental, Social, Governance)
-      3. Extract carbon emissions from tables
-      4. If carbon not found, derive from scopes
-      5. Validate all new metrics
-      6. Return only valid new metrics (not already in existing_metrics)
+      2. Extract social/governance metrics from tables
+      3. Validate all new metrics
+      4. Return only valid new metrics (not already in existing_metrics)
 
     Args:
         pdf_data: Raw PDF data dict from PDFExtractor
@@ -475,7 +330,7 @@ def run_extended_extraction(pdf_data: Dict, existing_metrics: List[Dict]) -> Lis
         List of new metric dicts to append to existing results
     """
     print("\n" + "-" * 50)
-    print("[STAGE 4] Extended metric extraction (plugin)...")
+    print("[STAGE 4] Extended metric extraction (social/governance)...")
     print("-" * 50)
 
     # Step 1: Collect rows
@@ -487,28 +342,14 @@ def run_extended_extraction(pdf_data: Dict, existing_metrics: List[Dict]) -> Lis
 
     extended_results: List[Dict] = []
 
-    # Step 2: Extract scores
-    scores = extract_scores_from_tables(all_rows)
-    for score in scores:
-        if score['normalized_metric'] not in existing_names:
-            extended_results.append(score)
-            existing_names.add(score['normalized_metric'])
+    # Step 2: Extract social/governance metrics
+    metrics = extract_metrics_from_tables(all_rows)
+    for metric in metrics:
+        if metric['normalized_metric'] not in existing_names:
+            extended_results.append(metric)
+            existing_names.add(metric['normalized_metric'])
 
-    # Step 3: Extract carbon emissions from tables
-    carbon = extract_carbon_from_tables(all_rows)
-    if carbon and 'CARBON_EMISSIONS' not in existing_names:
-        extended_results.append(carbon)
-        existing_names.add('CARBON_EMISSIONS')
-
-    # Step 4: Derive carbon if not found
-    if 'CARBON_EMISSIONS' not in existing_names:
-        # Combine existing + extended for derivation input
-        all_for_derivation = existing_metrics + extended_results
-        derived = derive_carbon_emissions(all_for_derivation)
-        if derived:
-            extended_results.append(derived)
-
-    # Step 5: Validate
+    # Step 3: Validate
     valid_results = []
     for metric in extended_results:
         if validate_new_metric(metric):

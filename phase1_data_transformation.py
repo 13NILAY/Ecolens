@@ -35,11 +35,15 @@ import numpy as np
 from pathlib import Path
 
 
-# TARGET METRICS — only these 7 metrics are used
+# TARGET METRICS — only these 11 RAW metrics are used
 TARGET_METRICS: Set[str] = {
+    # Environmental (6)
     'SCOPE_1', 'SCOPE_2', 'SCOPE_3',
     'ENERGY_CONSUMPTION', 'WATER_USAGE', 'WASTE_GENERATED',
-    'ESG_SCORE',
+    # Social (3)
+    'GENDER_DIVERSITY', 'SAFETY_INCIDENTS', 'EMPLOYEE_WELLBEING',
+    # Governance (2)
+    'DATA_BREACHES', 'COMPLAINTS',
 }
 
 
@@ -118,13 +122,20 @@ class ESGDataTransformer:
     def _init_validation_rules(self):
         """Initialize validation rules for Layer 11"""
         self.validation_ranges = {
+            # Environmental metrics
             'SCOPE_1': (0, 100_000_000),
             'SCOPE_2': (0, 100_000_000),
             'SCOPE_3': (0, 500_000_000),
             'ENERGY_CONSUMPTION': (0, 50_000_000),
             'WATER_USAGE': (0, 100_000_000),
             'WASTE_GENERATED': (0, 10_000_000),
-            'ESG_SCORE': (0, 100),
+            # Social metrics
+            'GENDER_DIVERSITY': (0, 100),
+            'SAFETY_INCIDENTS': (0, 10_000),
+            'EMPLOYEE_WELLBEING': (0, 100),
+            # Governance metrics
+            'DATA_BREACHES': (0, 1_000),
+            'COMPLAINTS': (0, 10_000),
         }
     
     def _log(self, message: str):
